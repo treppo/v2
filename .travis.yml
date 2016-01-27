@@ -1,1 +1,8 @@
 language: clojure
+deploy:
+  provider: heroku
+  api_key:
+    secure: Goq9tJjkYRGoi4uXIQkfJsO7i6BRouA2Wa+G4wIz9Hm+J2hgJPyRSZxC7UOhbUpT409gX1S55WoeQLHSl1IIYoKgaOGVEaMAyz8e7RBSVvIYT876SBkb4Q61mDlqv0ePspgIpM8EyqdZ2DkuQ5M5DQLAJLsWxx3+3dzWX8bJUG4voqV72VhXEFTovQvWfJCd1MbFCuoBg5XnEfrtnj1KgTS1k8FaLaHHwCfP+RdZ6Ocr66qj6uYdYqkgFDTLh0IKpns1aFXFxhSEa7JGRVqnRVy39l6q1WpEeeo2q/+Ey2h+0v9u/+7ziQdDVUBqRNHpQ/Ed/mCv7kxAqGNfQE/5FRSRZZMXzv6hUfEtDfqtAKgL/PPGhjmRHpHH8SNQK/ejBaA1ZJrCPj3G1sg3Ku8qMbOcWZnuP+ehadZBo/5F8VNND8TB6BlXcLc7yJLzfEd7Z7VC+BPiLhMoQ3QLzo/U0w0Bikk0oBQdwPLAS/L7jqpdr7CIZt76yUHHzGubGdUGUklzuwV7oifkjvlmeAu8mrg35AoMr/Y2fRKt5vAhANuYUOtZW1kgKLATICiJQluvVOG/UfGlcve++6rkOuq75YigahoU9L4X70pLWWnef8xhjdXvbnUxCH/De0BUQn2852xmmKGqKr1M1WCtJcNS33zgneKDxmCqQQx1dOVD26Y=
+  app: yorck-ratings
+  on:
+    repo: treppo/yorck-ratings-v2
