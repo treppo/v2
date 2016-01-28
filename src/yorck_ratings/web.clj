@@ -37,5 +37,6 @@
 (defn -main [& args]
   (let [handler (if (in-dev? args)
                   (reload/wrap-reload #'app)
-                  app)]
-    (run-server handler {:port (or (env :port) 8000)})))
+                  app)
+        port (Integer/parseInt (or (env :port) "8000"))]
+    (run-server handler {:port port})))
