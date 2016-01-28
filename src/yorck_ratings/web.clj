@@ -2,7 +2,8 @@
   (:use [org.httpkit.server :only [run-server]]
         [hiccup.page])
   (:require [ring.middleware.reload :as reload]
-            [yorck-ratings.core :as core])
+            [yorck-ratings.core :as core]
+            [environ.core :refer [env]])
   (:gen-class))
 
 (defn handle-not-found []
@@ -37,4 +38,4 @@
   (let [handler (if (in-dev? args)
                   (reload/wrap-reload #'app)
                   app)]
-    (run-server handler {:port 8080})))
+    (run-server handler {:port (or (env :port) 8000)})))
