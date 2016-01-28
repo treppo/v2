@@ -1,8 +1,8 @@
 (ns yorck-ratings.web
-  (:use [org.httpkit.server :only [run-server]]
-        [hiccup.page])
+  (:use [org.httpkit.server :only [run-server]])
   (:require [ring.middleware.reload :as reload]
             [yorck-ratings.core :as core]
+            [yorck-ratings.view :as view]
             [config.core :refer [env]])
   (:gen-class))
 
@@ -11,20 +11,10 @@
    :headers {"Content-Type" "text/html"}
    :body    "404 Not Found"})
 
-(defn markup [movies]
-  (html5
-    [:head
-     [:title "Yorck movies with IMDB ratings"]]
-    [:body
-     [:ol
-      (for [movie movies]
-        (let [{:keys [rating imdb-title yorck-title]} movie]
-          [:li (str rating " " imdb-title " " yorck-title)]))]]))
-
 (defn show-movies []
   {:status  200
    :headers {"Content-Type" "text/html"}
-   :body    (markup (core/rated-movies))})
+   :body    (view/markup (core/rated-movies))})
 
 (defn app [req]
   (if (= "/" (:uri req))
