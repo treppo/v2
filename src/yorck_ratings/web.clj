@@ -3,7 +3,7 @@
         [hiccup.page])
   (:require [ring.middleware.reload :as reload]
             [yorck-ratings.core :as core]
-            [environ.core :refer [env]])
+            [config.core :refer [env]])
   (:gen-class))
 
 (defn handle-not-found []
@@ -31,12 +31,8 @@
     (show-movies)
     (handle-not-found)))
 
-;; TODO read a config variable from command line, env, or file?
-(defn in-dev? [args] true)
-
 (defn -main [& args]
-  (let [handler (if (in-dev? args)
+  (let [handler (if (:hotreload? env)
                   (reload/wrap-reload #'app)
-                  app)
-        port (Integer/parseInt (or (env :port) "8000"))]
-    (run-server handler {:port port})))
+                  app)]
+    (run-server handler {:port (Integer/parseInt (:port env))})))

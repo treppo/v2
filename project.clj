@@ -8,7 +8,7 @@
                  [ring/ring-devel "1.4.0"]
                  [ring/ring-core "1.4.0"]
                  [http-kit.fake "0.2.2"]
-                 [environ "1.0.2"]]
+                 [luminus/config "0.3"]]
   :main ^:skip-aot yorck-ratings.web
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
