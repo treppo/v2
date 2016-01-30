@@ -1,8 +1,10 @@
 (ns yorck-ratings.core
   (:require [org.httpkit.client :as http]
             [clojure.core.async :as a]
-            [hickory.select :as h])
-  (:use [hickory.core]))
+            [hickory.select :as h]
+            [clojure.string :as str])
+  (:use [hickory.core])
+  (:import (java.util.regex Pattern)))
 
 (defrecord RatedMovie [rating rating-count imdb-title yorck-title])
 
@@ -22,6 +24,10 @@
                     (a/>! error-ch (error-message url status))
                     (a/>! result-ch (as-hickory (parse body)))))))))
 
+(defn rotate-article [title]
+  (let [pattern (Pattern/compile "^([\\w\\s]+), (\\w{3})", Pattern/UNICODE_CHARACTER_CLASS)]
+    (str/replace-first title pattern "$2 $1")))
+
 (def yorck-titles
   (fn [yorck-page]
     (->> yorck-page
@@ -29,6 +35,7 @@
                      (h/class :movie-details)
                      (h/tag :h2)))
          (mapcat :content)
+         (map rotate-article)
          (map #(RatedMovie. nil nil nil %))
          vec)))
 

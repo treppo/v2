@@ -28,7 +28,7 @@
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
                      "https://www.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
-                    (let [expected [(RatedMovie. nil nil nil "Hateful 8, The")
+                    (let [expected [(RatedMovie. nil nil nil "The Hateful 8")
                                     (RatedMovie. nil nil nil "Carol")]]
                       (is (= expected (a/<!! (rated-movies 100))))))))
 
@@ -57,6 +57,16 @@
 
 (deftest yorck-titles-test
   (testing "returns yorck movie titles"
-    (let [expected [(RatedMovie. nil nil nil "Hateful 8, The")
+    (let [expected [(RatedMovie. nil nil nil "The Hateful 8")
                     (RatedMovie. nil nil nil "Carol")]]
       (is (= expected (yorck-titles parsed-yorck-list-fixture))))))
+
+(deftest rotate-article-test
+  (testing "fixes Yorck titles with their article at the end"
+    (is (= "The Hateful 8" (rotate-article "Hateful 8, The")))
+    (is (= "Das Brandneue Testament" (rotate-article "Brandneue Testament, Das")))
+    (is (= "Der Unterhändler" (rotate-article "Unterhändler, Der")))
+    (is (= "Die Winzlinge - Operation Zuckerdose" (rotate-article "Winzlinge, Die - Operation Zuckerdose"))))
+
+  (testing "leaves titles without article untouched"
+    (is (= "Carol" (rotate-article "Carol")))))
