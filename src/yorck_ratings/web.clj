@@ -1,28 +1,32 @@
 (ns yorck-ratings.web
-  (:use [org.httpkit.server :only [run-server]])
+  (:use [org.httpkit.server :only [run-server with-channel send! close]])
   (:require [ring.middleware.reload :as reload]
             [yorck-ratings.core :as core]
             [yorck-ratings.view :as view]
-            [config.core :refer [env]])
+            [config.core :refer [env]]
+            [clojure.core.async :as a])
   (:gen-class))
 
-(defn handle-not-found []
+(defn not-found []
   {:status  404
    :headers {"Content-Type" "text/html"}
    :body    "404 Not Found"})
 
 (defn show-movies []
-  {:status  200
-   :headers {"Content-Type" "text/html"}
-   :body    (view/markup (core/rated-movies))})
+  (a/go {:status  200
+         :headers {"Content-Type" "text/html"}
+         :body    (view/markup (a/<! (core/rated-movies)))}))
 
-(defn app [req]
+(defn async-handler [req]
   (if (= "/" (:uri req))
-    (show-movies)
-    (handle-not-found)))
+    (with-channel req ch
+                  (a/go
+                    (send! ch (a/<! (show-movies)))
+                    (close ch)))
+    (not-found)))
 
 (defn -main [& args]
   (let [handler (if (:hotreload? env)
-                  (reload/wrap-reload #'app)
-                  app)]
+                  (reload/wrap-reload #'async-handler)
+                  async-handler)]
     (run-server handler {:port (Integer/parseInt (:port env))})))
