@@ -1,4 +1,5 @@
 language: clojure
+
 deploy:
   provider: heroku
   api_key:
@@ -6,3 +7,6 @@ deploy:
   app: yorck-ratings
   on:
     repo: treppo/yorck-ratings-v2
+
+jdk:
+  - oraclejdk8
