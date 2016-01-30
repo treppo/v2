@@ -6,11 +6,13 @@
 
 (defrecord RatedMovie [rating rating-count imdb-title yorck-title])
 
+(def DEFAULT-TIMEOUT 10000)
+
 (defn- error-message [url cause]
   (str "Error fetching URL \"" url "\": " cause))
 
 (defn async-get [url result-ch error-ch]
-  (http/get url
+  (http/get url {:timeout DEFAULT-TIMEOUT}
             (fn [{:keys [status body error]}]
               (a/go
                 (if error
@@ -31,7 +33,7 @@
          vec)))
 
 (defn rated-movies
-  ([] (rated-movies 10000))
+  ([] (rated-movies DEFAULT-TIMEOUT))
   ([timeout]
    (let [result-ch (a/chan 1 (map yorck-titles))
          error-ch (a/chan 1)
