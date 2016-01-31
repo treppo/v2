@@ -21,11 +21,15 @@
   (if (= "/" (:uri req))
     (with-channel req ch
                   (a/go
-                    (let [movie-chs (a/<! (core/rated-movies))
+                    (let [yorck-ch (core/rated-movies)
+                          movie-chs (a/<! yorck-ch)
                           html-ch (a/map (fn [& movies] (view/markup movies)) movie-chs)
                           response (found (a/<! html-ch))]
                       (send! ch response)
-                      (close ch))))
+                      (close ch)
+                      (a/close! yorck-ch)
+                      (a/close! html-ch)
+                      (map a/close! movie-chs))))
     (not-found)))
 
 (defn -main [& args]
