@@ -17,20 +17,21 @@
 (def parsed-yorck-list-fixture (as-hickory (parse yorck-list-fixture)))
 (def hateful-8-dp-fixture (load-fixture "hateful_8_detail_page.html"))
 (def hateful-8-sp-fixture (load-fixture "hateful_8_search_page.html"))
+(def parsed-hateful-8-sp-fixture (as-hickory (parse hateful-8-sp-fixture)))
 (def carol-dp-fixture (load-fixture "carol_detail_page.html"))
 (def carol-sp-fixture (load-fixture "carol_search_page.html"))
 (def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
 
 (deftest end-to-end-test
-  (testing "show yorck titles"
+  (testing "show both titles"
     (with-fake-http [yorck-list-url yorck-list-fixture
-                     "https://www.imdb.com/find?q=The+Hateful+8" hateful-8-sp-fixture
+                     "https://m.imdb.com/find?q=The+Hateful+8" hateful-8-sp-fixture
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
-                     "https://www.imdb.com/find?q=Carol" carol-sp-fixture
+                     "https://m.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
-                    (let [expected [(RatedMovie. nil nil nil "The Hateful 8")
-                                    (RatedMovie. nil nil nil "Carol")]]
-                      (is (= expected (a/<!! (rated-movies 100))))))))
+                    (let [expected [(RatedMovie. nil nil "The Hateful Eight" "The Hateful 8")
+                                    (RatedMovie. nil nil "Carol" "Carol")]]
+                      (is (= expected (map a/<!! (a/<!! (rated-movies)))))))))
 
 (deftest async-get-test
   (testing "writes parsed successful get request result to channel"
@@ -70,3 +71,10 @@
 
   (testing "leaves titles without article untouched"
     (is (= "Carol" (rotate-article "Carol")))))
+
+(deftest imdb-titles-test
+  (testing "returns imdb movie titles"
+    (let [yorck-infos [(RatedMovie. nil nil nil "The Hateful 8")]
+          title-added (RatedMovie. nil nil "The Hateful Eight" "The Hateful 8")
+          fetch-f (fn [title ch] (a/>!! ch parsed-hateful-8-sp-fixture))]
+      (is (= title-added (a/<!! (first (imdb-titles yorck-infos fetch-f))))))))

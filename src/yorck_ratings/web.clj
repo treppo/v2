@@ -12,17 +12,20 @@
    :headers {"Content-Type" "text/html"}
    :body    "404 Not Found"})
 
-(defn show-movies []
-  (a/go {:status  200
-         :headers {"Content-Type" "text/html"}
-         :body    (view/markup (a/<! (core/rated-movies)))}))
+(defn found [body]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    body})
 
 (defn async-handler [req]
   (if (= "/" (:uri req))
     (with-channel req ch
                   (a/go
-                    (send! ch (a/<! (show-movies)))
-                    (close ch)))
+                    (let [movie-chs (a/<! (core/rated-movies))
+                          html-ch (a/map (fn [& movies] (view/markup movies)) movie-chs)
+                          response (found (a/<! html-ch))]
+                      (send! ch response)
+                      (close ch))))
     (not-found)))
 
 (defn -main [& args]
