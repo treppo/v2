@@ -40,28 +40,26 @@
   (let [pattern (Pattern/compile "^([\\w\\s]+), (\\w{3})", Pattern/UNICODE_CHARACTER_CLASS)]
     (str/replace-first title pattern "$2 $1")))
 
-(def yorck-titles
-  (fn [yorck-page]
-    (->> yorck-page
-         (h/select (h/descendant
-                     (h/class :movie-details)
-                     (h/tag :h2)))
-         (mapcat :content)
-         (map rotate-article)
-         (map #(RatedMovie. nil nil nil %))
-         vec)))
+(defn yorck-titles [yorck-page]
+  (->> yorck-page
+       (h/select (h/descendant
+                   (h/class :movie-details)
+                   (h/tag :h2)))
+       (mapcat :content)
+       (map rotate-article)
+       (map #(RatedMovie. nil nil nil %))
+       vec))
 
-(def imdb-title
-  (fn [sp]
-    (->> sp
-         (h/select (h/descendant
-                     (h/class :posters)
-                     (h/class :poster)
-                     (h/class :title)
-                     (h/tag :a)))
-         first
-         :content
-         first)))
+(defn imdb-title [sp]
+  (->> sp
+       (h/select (h/descendant
+                   (h/class :posters)
+                   (h/class :poster)
+                   (h/class :title)
+                   (h/tag :a)))
+       first
+       :content
+       first))
 
 (defn imdb-titles [yorck-infos fetch-f]
   (let [chs (repeatedly (partial a/chan 1))]
