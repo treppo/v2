@@ -31,7 +31,8 @@
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
                     (let [expected [(RatedMovie. nil nil "The Hateful Eight" "The Hateful 8")
                                     (RatedMovie. nil nil "Carol" "Carol")]]
-                      (is (= expected (map a/<!! (a/<!! (rated-movies)))))))))
+                      (rated-movies (fn [movies]
+                                      (is (= expected movies))))))))
 
 (deftest async-get-test
   (testing "writes parsed successful get request result to channel"
@@ -71,10 +72,3 @@
 
   (testing "leaves titles without article untouched"
     (is (= "Carol" (rotate-article "Carol")))))
-
-(deftest imdb-titles-test
-  (testing "returns imdb movie titles"
-    (let [yorck-infos [(RatedMovie. nil nil nil "The Hateful 8")]
-          title-added (RatedMovie. nil nil "The Hateful Eight" "The Hateful 8")
-          fetch-f (fn [title ch] (a/>!! ch parsed-hateful-8-sp-fixture))]
-      (is (= title-added (a/<!! (first (imdb-titles yorck-infos fetch-f))))))))

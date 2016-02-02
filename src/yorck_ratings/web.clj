@@ -20,16 +20,10 @@
 (defn async-handler [req]
   (if (= "/" (:uri req))
     (with-channel req ch
-                  (a/go
-                    (let [yorck-ch (core/rated-movies)
-                          movie-chs (a/<! yorck-ch)
-                          html-ch (a/map (fn [& movies] (view/markup movies)) movie-chs)
-                          response (found (a/<! html-ch))]
-                      (send! ch response)
-                      (close ch)
-                      (a/close! yorck-ch)
-                      (a/close! html-ch)
-                      (map a/close! movie-chs))))
+                  (core/rated-movies
+                    (fn [movies]
+                      (send! ch (found (view/markup movies)))
+                      (close ch))))
     (not-found)))
 
 (defn -main [& args]

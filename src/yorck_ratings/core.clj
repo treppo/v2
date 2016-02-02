@@ -31,7 +31,7 @@
 (defn fetch-yorck-list [result-ch error-ch]
   (async-get "https://www.yorck.de/filme?filter_today=true" result-ch error-ch))
 
-(defn fetch-imdb-info [error-ch title result-ch]
+(defn fetch-imdb-sp-info [error-ch {title :yorck-title} result-ch]
   (let [enc-title (URLEncoder/encode title "UTF-8")
         url (str "https://m.imdb.com/find?q=" enc-title)]
     (async-get url result-ch error-ch)))
@@ -61,16 +61,23 @@
        :content
        first))
 
-(defn imdb-titles [yorck-infos fetch-f]
-  (let [chs (repeatedly (partial a/chan 1))]
-    (map (fn [movie ch]
-           (fetch-f (:yorck-title movie) ch)
-           (a/go (add-imdb-title movie (imdb-title (a/<! ch)))))
-         yorck-infos chs)))
+(defn with-imdb-title [movie ch]
+  (a/go (add-imdb-title movie (imdb-title (a/<! ch)))))
 
-(defn rated-movies []
-  (let [result-ch (a/chan 1 (map yorck-titles))
-        error-ch (a/chan 1)]
-    (fetch-yorck-list result-ch error-ch)
-    (a/go
-      (imdb-titles (a/<! result-ch) (partial fetch-imdb-info error-ch)))))
+(defn rated-movies [cb]
+  (a/go
+    (let [result-ch (a/chan 1 (map yorck-titles))
+          error-ch (a/chan)
+          imdb-sp-chs (repeatedly (partial a/chan 1))
+
+          _ (fetch-yorck-list result-ch error-ch)
+
+          yorck-infos (a/<! result-ch)
+
+          _ (doall (map (partial fetch-imdb-sp-info error-ch) yorck-infos imdb-sp-chs))
+          movie-chs (map with-imdb-title yorck-infos imdb-sp-chs)]
+
+      (a/map (fn [& movies] (cb movies)) movie-chs)
+      (a/close! result-ch)
+      (a/close! error-ch)
+      (map a/close! imdb-sp-chs))))
