@@ -29,10 +29,12 @@
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
                      "https://m.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
-                    (let [expected [(RatedMovie. nil nil "The Hateful Eight" "The Hateful 8")
-                                    (RatedMovie. nil nil "Carol" "Carol")]]
-                      (rated-movies (fn [movies]
-                                      (is (= expected movies))))))))
+                    (let [expected [(make-rated-movie {:imdb-title "The Hateful Eight" :yorck-title "The Hateful 8"})
+                                    (make-rated-movie {:imdb-title "Carol" :yorck-title "Carol"})]
+                          actual (atom [])]
+                      (rated-movies (fn [movies] (swap! actual concat movies)))
+                      (Thread/sleep 500)
+                      (is (= @actual expected))))))
 
 (deftest async-get-test
   (testing "writes parsed successful get request result to channel"
@@ -59,8 +61,8 @@
 
 (deftest yorck-titles-test
   (testing "returns yorck movie titles"
-    (let [expected [(RatedMovie. nil nil nil "The Hateful 8")
-                    (RatedMovie. nil nil nil "Carol")]]
+    (let [expected [(make-rated-movie {:yorck-title "The Hateful 8"})
+                    (make-rated-movie {:yorck-title "Carol"})]]
       (is (= expected (yorck-titles parsed-yorck-list-fixture))))))
 
 (deftest rotate-article-test

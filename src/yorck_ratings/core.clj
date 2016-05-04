@@ -7,7 +7,15 @@
   (:import (java.util.regex Pattern)
            (java.net URLEncoder)))
 
-(defrecord RatedMovie [rating rating-count imdb-title yorck-title])
+(defrecord RatedMovie [rating rating-count imdb-title imdb-url yorck-title yorck-url])
+(defn make-rated-movie
+  [{:keys [yorck-title rating rating-count imdb-title imdb-url yorck-url]
+    :or   {rating       0
+           rating-count 0
+           imdb-title   "No title"
+           imdb-url     ""
+           yorck-url    ""}}]
+  (RatedMovie. rating rating-count imdb-title imdb-url yorck-title yorck-url))
 
 (defn- add-imdb-title [movie title]
   (assoc movie :imdb-title title))
@@ -47,7 +55,7 @@
                    (h/tag :h2)))
        (mapcat :content)
        (map rotate-article)
-       (map #(RatedMovie. nil nil nil %))
+       (map #(make-rated-movie {:yorck-title %}))
        vec))
 
 (defn imdb-title [sp]
