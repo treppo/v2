@@ -7,6 +7,9 @@
   (:import (java.util.regex Pattern)
            (java.net URLEncoder)))
 
+(def imdb-base-url "https://m.imdb.com")
+(def yorck-base-url "https://www.yorck.de")
+
 (defrecord RatedMovie [rating rating-count imdb-title imdb-url yorck-title yorck-url])
 (defn make-rated-movie
   [{:keys [yorck-title rating rating-count imdb-title imdb-url yorck-url]
@@ -16,9 +19,6 @@
            imdb-url     ""
            yorck-url    ""}}]
   (RatedMovie. rating rating-count imdb-title imdb-url yorck-title yorck-url))
-
-(defn- add-imdb-title [movie title]
-  (assoc movie :imdb-title title))
 
 (def DEFAULT-TIMEOUT 60000)
 
@@ -37,11 +37,11 @@
                     (a/>! result-ch (as-hickory (parse body)))))))))
 
 (defn fetch-yorck-list [result-ch error-ch]
-  (async-get "https://www.yorck.de/filme?filter_today=true" result-ch error-ch))
+  (async-get (str yorck-base-url "/filme?filter_today=true") result-ch error-ch))
 
 (defn fetch-imdb-sp-info [error-ch {title :yorck-title} result-ch]
   (let [enc-title (URLEncoder/encode title "UTF-8")
-        url (str "https://m.imdb.com/find?q=" enc-title)]
+        url (str imdb-base-url "/find?q=" enc-title)]
     (async-get url result-ch error-ch)))
 
 (defn rotate-article [title]
@@ -63,7 +63,7 @@
                    (h/tag :a)))
        (mapv :attrs)
        (map :href)
-       (map #(str "https://www.yorck.de" %))))
+       (map #(str yorck-base-url %))))
 
 (defn yorck-titles-urls [yorck-page]
   (map #(make-rated-movie {:yorck-title %1
@@ -82,8 +82,24 @@
        :content
        first))
 
+(defn imdb-url [sp]
+  (->> sp
+       (h/select (h/descendant
+                   (h/class :posters)
+                   (h/class :poster)
+                   (h/class :title)
+                   (h/tag :a)))
+       (mapv :attrs)
+       (mapv :href)
+       first
+       (str imdb-base-url)))
+
+(defn imdb-title-url [sp]
+  {:imdb-title (imdb-title sp)
+   :imdb-url   (imdb-url sp)})
+
 (defn with-imdb-title [movie ch]
-  (a/go (add-imdb-title movie (imdb-title (a/<! ch)))))
+  (a/go (merge movie (imdb-title-url (a/<! ch)))))
 
 (defn rated-movies [cb]
   (a/go

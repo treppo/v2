@@ -29,9 +29,11 @@
                      "https://m.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
                     (let [expected [(make-rated-movie {:imdb-title  "The Hateful Eight"
+                                                       :imdb-url    "https://m.imdb.com/title/tt3460252/"
                                                        :yorck-title "The Hateful 8"
                                                        :yorck-url   "https://www.yorck.de/filme/hateful-8-the"})
                                     (make-rated-movie {:imdb-title  "Carol"
+                                                       :imdb-url    "https://m.imdb.com/title/tt2402927/"
                                                        :yorck-title "Carol"
                                                        :yorck-url   "https://www.yorck.de/filme/carol"})]
                           actual (atom [])]
@@ -80,6 +82,22 @@
                     (make-rated-movie {:yorck-title "Carol"
                                        :yorck-url   "https://www.yorck.de/filme/carol"})]]
       (is (= expected (yorck-titles-urls parsed-yorck-list-fixture))))))
+
+(deftest imdb-titles-test
+  (testing "returns imdb movie titles"
+    (let [expected "The Hateful Eight"]
+      (is (= expected (imdb-title parsed-hateful-8-sp-fixture))))))
+
+(deftest imdb-urls-test
+  (testing "returns imdb movie urls"
+    (let [expected "https://m.imdb.com/title/tt3460252/"]
+      (is (= expected (imdb-url parsed-hateful-8-sp-fixture))))))
+
+(deftest imdb-titles-urls-test
+  (testing "returns imdb movie titles"
+    (let [expected {:imdb-title "The Hateful Eight"
+                    :imdb-url   "https://m.imdb.com/title/tt3460252/"}]
+      (is (= expected (imdb-title-url parsed-hateful-8-sp-fixture))))))
 
 (deftest rotate-article-test
   (testing "fixes Yorck titles with their article at the end"

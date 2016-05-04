@@ -2,8 +2,8 @@
   (:use [hiccup.page]))
 
 (defn movie-item [movie]
-  (let [{:keys [rating rating-count imdb-title yorck-title yorck-url]} movie]
-    (str rating " (" rating-count ") " imdb-title " <a href=\"" yorck-url "\">" yorck-title "</a>")))
+  (let [{:keys [rating rating-count imdb-title imdb-url yorck-title yorck-url]} movie]
+    (str rating " (" rating-count ") <a href=\"" imdb-url "\">" imdb-title "</a> <a href=\"" yorck-url "\">" yorck-title "</a>")))
 
 (defn markup [movies]
   (html5
