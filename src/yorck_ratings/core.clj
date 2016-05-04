@@ -54,9 +54,22 @@
                    (h/class :movie-details)
                    (h/tag :h2)))
        (mapcat :content)
-       (map rotate-article)
-       (map #(make-rated-movie {:yorck-title %}))
-       vec))
+       (mapv rotate-article)))
+
+(defn yorck-urls [yorck-page]
+  (->> yorck-page
+       (h/select (h/descendant
+                   (h/class :movie-details)
+                   (h/tag :a)))
+       (mapv :attrs)
+       (map :href)
+       (map #(str "https://www.yorck.de" %))))
+
+(defn yorck-titles-urls [yorck-page]
+  (map #(make-rated-movie {:yorck-title %1
+                           :yorck-url   %2})
+       (yorck-titles yorck-page)
+       (yorck-urls yorck-page)))
 
 (defn imdb-title [sp]
   (->> sp
@@ -74,7 +87,7 @@
 
 (defn rated-movies [cb]
   (a/go
-    (let [result-ch (a/chan 1 (map yorck-titles))
+    (let [result-ch (a/chan 1 (map yorck-titles-urls))
           error-ch (a/chan)
           imdb-sp-chs (repeatedly (partial a/chan 1))
 
