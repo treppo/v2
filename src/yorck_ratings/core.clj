@@ -144,9 +144,14 @@
       (merge movie {:rating (imdb-rating page)
                     :rating-count (imdb-rating-count page)}))))
 
+(defn remove-sneak-preview [movies]
+  (remove #(str/includes? (str/lower-case (:yorck-title %)) "sneak") movies))
+
 (defn rated-movies [cb]
   (a/go
-    (let [result-ch (a/chan 1 (map yorck-titles-urls))
+    (let [result-ch (a/chan 1 (comp
+                                (map yorck-titles-urls)
+                                (map remove-sneak-preview)))
           error-ch (a/chan)
           imdb-sp-chs (repeatedly (partial a/chan 1))
           imdb-dp-chs (repeatedly (partial a/chan 1))
