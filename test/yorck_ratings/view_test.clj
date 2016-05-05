@@ -12,5 +12,5 @@
 
 (deftest movie-item-test
   (testing "returns string of movie properties"
-    (is (= "9.0 (120000) <a href=\"https://www.imdb.com\">Titanic</a> <a href=\"https://www.yorck.de\">Titanic</a>"
+    (is (= "9.0 (120000) • <a href=\"https://www.imdb.com\">Titanic</a> • <a href=\"https://www.yorck.de\">Titanic</a>"
            (movie-item movie1)))))
