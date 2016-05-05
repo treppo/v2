@@ -17,6 +17,7 @@
 (def hateful-8-dp-fixture (load-fixture "hateful_8_detail_page.html"))
 (def hateful-8-sp-fixture (load-fixture "hateful_8_search_page.html"))
 (def parsed-hateful-8-sp-fixture (as-hickory (parse hateful-8-sp-fixture)))
+(def parsed-hateful-8-dp-fixture (as-hickory (parse hateful-8-dp-fixture)))
 (def carol-dp-fixture (load-fixture "carol_detail_page.html"))
 (def carol-sp-fixture (load-fixture "carol_search_page.html"))
 (def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
@@ -28,11 +29,13 @@
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
                      "https://m.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
-                    (let [expected [(make-rated-movie {:imdb-title  "The Hateful Eight"
+                    (let [expected [(make-rated-movie {:rating      8.0
+                                                       :imdb-title  "The Hateful Eight"
                                                        :imdb-url    "https://m.imdb.com/title/tt3460252/"
                                                        :yorck-title "The Hateful 8"
                                                        :yorck-url   "https://www.yorck.de/filme/hateful-8-the"})
-                                    (make-rated-movie {:imdb-title  "Carol"
+                                    (make-rated-movie {:rating      7.6
+                                                       :imdb-title  "Carol"
                                                        :imdb-url    "https://m.imdb.com/title/tt2402927/"
                                                        :yorck-title "Carol"
                                                        :yorck-url   "https://www.yorck.de/filme/carol"})]
@@ -97,11 +100,18 @@
   (testing "returns imdb movie titles"
     (let [expected {:imdb-title "The Hateful Eight"
                     :imdb-url   "https://m.imdb.com/title/tt3460252/"}]
-      (is (= expected (imdb-title-url parsed-hateful-8-sp-fixture))))))
+      (is (= expected (imdb-sp-infos parsed-hateful-8-sp-fixture))))))
+
+(deftest imdb-rating-test
+  (testing "returns imdb movie rating"
+    (let [expected 8.0]
+      (is (= expected (imdb-rating parsed-hateful-8-dp-fixture))))))
+
 
 (deftest rotate-article-test
   (testing "fixes Yorck titles with their article at the end"
     (is (= "The Hateful 8" (rotate-article "Hateful 8, The")))
+    (is (= "Hail, Caesar!" (rotate-article "Hail, Caesar!")))
     (is (= "Das Brandneue Testament" (rotate-article "Brandneue Testament, Das")))
     (is (= "Der Unterhändler" (rotate-article "Unterhändler, Der")))
     (is (= "Die Winzlinge - Operation Zuckerdose" (rotate-article "Winzlinge, Die - Operation Zuckerdose"))))
