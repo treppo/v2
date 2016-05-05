@@ -168,4 +168,5 @@
       (a/map (fn [& movies] (cb (reverse (sort-by :rating movies)))) rated-movie-chs)
       (a/close! result-ch)
       (a/close! error-ch)
-      (map a/close! imdb-sp-chs))))
+      (map a/close! imdb-sp-chs)
+      (map a/close! imdb-dp-chs))))
