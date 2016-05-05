@@ -112,6 +112,24 @@
          Double/parseDouble)
     (catch Exception e 0.0)))
 
+(defn- remove-comma [s]
+  (str/replace-first s "," ""))
+
+(defn imdb-rating-count [dp]
+  (try
+    (->> dp
+         (h/select (h/descendant
+                     (h/id :ratings-bar)
+                     h/first-child
+                     (h/class :inline-block)
+                     (h/class :text-muted)))
+         first
+         :content
+         last
+         remove-comma
+         Integer/parseInt)
+    (catch Exception e 0)))
+
 (defn imdb-sp-infos [sp]
   {:imdb-title (imdb-title sp)
    :imdb-url   (imdb-url sp)})
@@ -123,7 +141,8 @@
   (a/go
     (let [movie (a/<! movie-ch)
           page (a/<! dp-ch)]
-      (merge movie {:rating (imdb-rating page)}))))
+      (merge movie {:rating (imdb-rating page)
+                    :rating-count (imdb-rating-count page)}))))
 
 (defn rated-movies [cb]
   (a/go

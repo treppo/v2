@@ -29,16 +29,18 @@
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
                      "https://m.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
-                    (let [expected [(make-rated-movie {:rating      8.0
-                                                       :imdb-title  "The Hateful Eight"
-                                                       :imdb-url    "https://m.imdb.com/title/tt3460252/"
-                                                       :yorck-title "The Hateful 8"
-                                                       :yorck-url   "https://www.yorck.de/filme/hateful-8-the"})
-                                    (make-rated-movie {:rating      7.6
-                                                       :imdb-title  "Carol"
-                                                       :imdb-url    "https://m.imdb.com/title/tt2402927/"
-                                                       :yorck-title "Carol"
-                                                       :yorck-url   "https://www.yorck.de/filme/carol"})]
+                    (let [expected [(make-rated-movie {:rating       8.0
+                                                       :rating-count 123336
+                                                       :imdb-title   "The Hateful Eight"
+                                                       :imdb-url     "https://m.imdb.com/title/tt3460252/"
+                                                       :yorck-title  "The Hateful 8"
+                                                       :yorck-url    "https://www.yorck.de/filme/hateful-8-the"})
+                                    (make-rated-movie {:rating       7.6
+                                                       :rating-count 22728
+                                                       :imdb-title   "Carol"
+                                                       :imdb-url     "https://m.imdb.com/title/tt2402927/"
+                                                       :yorck-title  "Carol"
+                                                       :yorck-url    "https://www.yorck.de/filme/carol"})]
                           actual (atom [])]
                       (rated-movies (fn [movies] (swap! actual concat movies)))
                       (Thread/sleep 500)
@@ -107,6 +109,10 @@
     (let [expected 8.0]
       (is (= expected (imdb-rating parsed-hateful-8-dp-fixture))))))
 
+(deftest imdb-rating-count-test
+  (testing "returns imdb movie rating count"
+    (let [expected 123336]
+      (is (= expected (imdb-rating-count parsed-hateful-8-dp-fixture))))))
 
 (deftest rotate-article-test
   (testing "fixes Yorck titles with their article at the end"
