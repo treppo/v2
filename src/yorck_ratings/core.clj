@@ -141,7 +141,7 @@
           m-chs (doall (map (partial fetch-imdb-dp error-ch) movie-chs imdb-dp-chs))
           rated-movie-chs (map with-rating m-chs imdb-dp-chs)]
 
-      (a/map (fn [& movies] (cb movies)) rated-movie-chs)
+      (a/map (fn [& movies] (cb (reverse (sort-by :rating movies)))) rated-movie-chs)
       (a/close! result-ch)
       (a/close! error-ch)
       (map a/close! imdb-sp-chs))))

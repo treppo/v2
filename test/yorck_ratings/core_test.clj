@@ -23,7 +23,7 @@
 (def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
 
 (deftest end-to-end-test
-  (testing "return rated movie infos"
+  (testing "return rated movie infos ordered by rating"
     (with-fake-http [yorck-list-url yorck-list-fixture
                      "https://m.imdb.com/find?q=The+Hateful+8" hateful-8-sp-fixture
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
@@ -69,21 +69,21 @@
 
 (deftest yorck-titles-test
   (testing "returns yorck movie titles"
-    (let [expected ["The Hateful 8" "Carol"]]
+    (let [expected ["Carol" "The Hateful 8"]]
       (is (= expected (yorck-titles parsed-yorck-list-fixture))))))
 
 (deftest yorck-urls-test
   (testing "returns yorck movie urls"
-    (let [expected ["https://www.yorck.de/filme/hateful-8-the"
-                    "https://www.yorck.de/filme/carol"]]
+    (let [expected ["https://www.yorck.de/filme/carol"
+                    "https://www.yorck.de/filme/hateful-8-the"]]
       (is (= expected (yorck-urls parsed-yorck-list-fixture))))))
 
-(deftest yorck-titles-urls-test
-  (testing "returns yorck movie titles"
-    (let [expected [(make-rated-movie {:yorck-title "The Hateful 8"
-                                       :yorck-url   "https://www.yorck.de/filme/hateful-8-the"})
-                    (make-rated-movie {:yorck-title "Carol"
-                                       :yorck-url   "https://www.yorck.de/filme/carol"})]]
+(deftest yorck-sp-infos-test
+  (testing "returns yorck movie titles and urls"
+    (let [expected [(make-rated-movie {:yorck-title "Carol"
+                                       :yorck-url   "https://www.yorck.de/filme/carol"})
+                    (make-rated-movie {:yorck-title "The Hateful 8"
+                                       :yorck-url   "https://www.yorck.de/filme/hateful-8-the"})]]
       (is (= expected (yorck-titles-urls parsed-yorck-list-fixture))))))
 
 (deftest imdb-titles-test
