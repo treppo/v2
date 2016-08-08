@@ -12,11 +12,22 @@
      [:meta {:charset "utf-8"}]
      [:style "body {
                 font-size: 16px;
-                line-height: 1.5em;
+                line-height: 1.4rem;
               }
               ol { list-style: none; }
-              a { color: black; }"]]
+              li {
+                padding: .1rem;
+              }
+              a { color: black; }
+              .highlighted {
+                background-color: yellow;
+                margin-left: -.4rem;
+                margin-right: -.4rem;
+                padding-left: .4rem;
+                padding-right: .4rem;
+               }"]]
     [:body
      [:ol
       (for [movie movies]
-        [:li (movie-item movie)])]]))
+        [:li
+         [:span {:class (if (< (:rating movie) 7) "" "highlighted")} (movie-item movie)]])]]))
