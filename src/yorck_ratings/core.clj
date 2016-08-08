@@ -53,13 +53,18 @@
   (let [pattern (Pattern/compile "^([\\w\\s]+), (Der|Die|Das|The)", Pattern/UNICODE_CHARACTER_CLASS)]
     (str/replace-first title pattern "$2 $1")))
 
+(defn remove-dimension [title]
+  (let [pattern (Pattern/compile " (- )?2D.*", Pattern/UNICODE_CHARACTER_CLASS)]
+    (str/replace-first title pattern "")))
+
 (defn yorck-titles [yorck-page]
   (->> yorck-page
        (h/select (h/descendant
                    (h/class :movie-details)
                    (h/tag :h2)))
        (mapcat :content)
-       (mapv rotate-article)))
+       (mapv rotate-article)
+       (mapv remove-dimension)))
 
 (defn yorck-urls [yorck-page]
   (->> yorck-page

@@ -127,3 +127,11 @@
 
   (testing "leaves titles without article untouched"
     (is (= "Carol" (rotate-article "Carol")))))
+
+(deftest remove-dimension-test
+  (testing "fixes Yorck titles with 2D info added"
+    (is (= "Pets" (remove-dimension "Pets - 2D")))
+    (is (= "Ice Age - Kollision voraus!" (remove-dimension "Ice Age - Kollision voraus! 2D!"))))
+
+  (testing "leaves titles without 2D info untouched"
+    (is (= "Lou Andreas-Salomé" (remove-dimension "Lou Andreas-Salomé")))))
