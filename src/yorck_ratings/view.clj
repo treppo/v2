@@ -10,11 +10,17 @@
     [:head
      [:title "Yorck movies with IMDB ratings"]
      [:meta {:charset "utf-8"}]
+     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
      [:style "body {
                 font-size: 16px;
                 line-height: 1.4rem;
+                margin: 0;
               }
-              ol { list-style: none; }
+              ol {
+                list-style: none;
+                padding: 0;
+                margin: 2.8rem 10%;
+              }
               li {
                 padding: .1rem;
               }
