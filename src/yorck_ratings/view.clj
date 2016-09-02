@@ -11,18 +11,25 @@
      [:title "Yorck movies with IMDB ratings"]
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-     [:style "body {
+     [:style "* + * { margin-top: 1.5em; }
+              body {
                 font-size: 16px;
+                font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", \"Oxygen\", \"Ubuntu\", \"Cantarell\", \"Fira Sans\", \"Droid Sans\", \"Helvetica Neue\", sans-serif;
                 line-height: 1.4rem;
-                margin: 0;
+                margin-left: 5%;
+                margin-right: 5%;
+              }
+              h1 {
+                font-size: 1rem;
+                font-weight: normal;
               }
               ol {
                 list-style: none;
                 padding: 0;
-                margin: 2.8rem 10%;
               }
               li {
                 padding: .1rem;
+                margin-top: 0;
               }
               a { color: black; }
               .highlighted {
@@ -33,6 +40,7 @@
                 padding-right: .4rem;
                }"]]
     [:body
+     [:h1 "IMDB rated Yorck movies"]
      [:ol
       (for [movie movies]
         [:li
