@@ -1,0 +1,106 @@
+(ns yorck-ratings.core-sync-test
+  (:use org.httpkit.fake
+        hickory.core)
+  (:require [clojure.test :refer :all]
+            [yorck-ratings.core-sync :as core]
+            [clojure.java.io :as io]
+            [clojure.core.async :as a]))
+
+(defn load-fixture [filename]
+  (->> filename
+       (str "fixtures/")
+       (io/resource)
+       (slurp)))
+
+(def yorck-list-fixture (load-fixture "yorck_list.html"))
+(def parsed-yorck-list-fixture (as-hickory (parse yorck-list-fixture)))
+(def hateful-8-dp-fixture (load-fixture "hateful_8_detail_page.html"))
+(def hateful-8-sp-fixture (load-fixture "hateful_8_search_page.html"))
+(def parsed-hateful-8-sp-fixture (as-hickory (parse hateful-8-sp-fixture)))
+(def parsed-hateful-8-dp-fixture (as-hickory (parse hateful-8-dp-fixture)))
+(def carol-dp-fixture (load-fixture "carol_detail_page.html"))
+(def carol-sp-fixture (load-fixture "carol_search_page.html"))
+(def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
+
+(deftest rated-movies-test
+  (testing "return rated movie infos ordered by rating"
+    (let [expected [(core/make-rated-movie {:rating       8.0
+                                            :rating-count 123336
+                                            :imdb-title   "The Hateful Eight"
+                                            :imdb-url     "https://m.imdb.com/title/tt3460252/"
+                                            :yorck-title  "The Hateful 8"
+                                            :yorck-url    "https://www.yorck.de/filme/hateful-8-the"})
+                    (core/make-rated-movie {:rating       7.6
+                                            :rating-count 22728
+                                            :imdb-title   "Carol"
+                                            :imdb-url     "https://m.imdb.com/title/tt2402927/"
+                                            :yorck-title  "Carol"
+                                            :yorck-url    "https://www.yorck.de/filme/carol"})]
+          get-yorck-info (fn [] [{:yorck-title "Carol"
+                                  :yorck-url   "https://www.yorck.de/filme/carol"}
+                                 {:yorck-title "The Hateful 8"
+                                  :yorck-url   "https://www.yorck.de/filme/hateful-8-the"}])
+          get-imdb-search-result (fn [title]
+                                   (if (= title "Carol")
+                                     {:imdb-title "Carol"
+                                      :imdb-url   "https://m.imdb.com/title/tt2402927/"}
+                                     {:imdb-title "The Hateful Eight"
+                                      :imdb-url   "https://m.imdb.com/title/tt3460252/"}))
+          get-imdb-detail-info (fn [url]
+                                 (if (= url "https://m.imdb.com/title/tt2402927/")
+                                   {:rating       7.6
+                                    :rating-count 22728}
+                                   {:rating       8.0
+                                    :rating-count 123336}))
+          actual (core/rated-movies get-yorck-info get-imdb-search-result get-imdb-detail-info)]
+
+      (is (= actual expected)))))
+
+(deftest async-get-test
+  (testing "writes parsed successful get request result to channel"
+    (with-fake-http [yorck-list-url yorck-list-fixture]
+                    (let [result-ch (a/chan 1)
+                          error-ch (a/chan 1)]
+                      (core/async-get yorck-list-url result-ch error-ch)
+                      (is (= parsed-yorck-list-fixture (a/<!! result-ch))))))
+
+  (testing "writes request error to error channel"
+    (let [result-ch (a/chan 1)
+          error-ch (a/chan 1)
+          expected "Error fetching URL \"http://non-existant-url.kentucky\": non-existant-url.kentucky: unknown error"]
+      (core/async-get "http://non-existant-url.kentucky" result-ch error-ch)
+      (is (= expected (a/<!! error-ch)))))
+
+  (testing "writes successful request with exceptional response to error channel"
+    (with-fake-http ["http://m.imdb.com/non-existant-uri" 404]
+                    (let [result-ch (a/chan 1)
+                          error-ch (a/chan 1)
+                          expected "Error fetching URL \"http://m.imdb.com/non-existant-uri\": 404"]
+                      (core/async-get "http://m.imdb.com/non-existant-uri" result-ch error-ch)
+                      (is (= expected (a/<!! error-ch)))))))
+
+(deftest imdb-titles-test
+  (testing "returns imdb movie titles"
+    (let [expected "The Hateful Eight"]
+      (is (= expected (core/imdb-title parsed-hateful-8-sp-fixture))))))
+
+(deftest imdb-urls-test
+  (testing "returns imdb movie urls"
+    (let [expected "https://m.imdb.com/title/tt3460252/"]
+      (is (= expected (core/imdb-url parsed-hateful-8-sp-fixture))))))
+
+(deftest imdb-titles-urls-test
+  (testing "returns imdb movie titles"
+    (let [expected {:imdb-title "The Hateful Eight"
+                    :imdb-url   "https://m.imdb.com/title/tt3460252/"}]
+      (is (= expected (core/imdb-sp-infos parsed-hateful-8-sp-fixture))))))
+
+(deftest imdb-rating-test
+  (testing "returns imdb movie rating"
+    (let [expected 8.0]
+      (is (= expected (core/imdb-rating parsed-hateful-8-dp-fixture))))))
+
+(deftest imdb-rating-count-test
+  (testing "returns imdb movie rating count"
+    (let [expected 123336]
+      (is (= expected (core/imdb-rating-count parsed-hateful-8-dp-fixture))))))

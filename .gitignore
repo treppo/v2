@@ -11,3 +11,4 @@ pom.xml.asc
 .hg/
 .idea
 yorck-ratings.iml
+.DS_Store

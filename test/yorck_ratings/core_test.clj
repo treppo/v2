@@ -57,7 +57,7 @@
   (testing "writes request error to error channel"
     (let [result-ch (a/chan 1)
           error-ch (a/chan 1)
-          expected "Error fetching URL \"http://non-existant-url.kentucky\": non-existant-url.kentucky: unknown error"]
+          expected "Error fetching URL \"http://non-existant-url.kentucky\": non-existant-url.kentucky"]
       (async-get "http://non-existant-url.kentucky" result-ch error-ch)
       (is (= expected (a/<!! error-ch)))))
 

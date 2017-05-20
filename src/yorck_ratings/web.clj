@@ -1,7 +1,7 @@
 (ns yorck-ratings.web
   (:use [org.httpkit.server :only [run-server with-channel send! close]])
   (:require [ring.middleware.reload :as reload]
-            [yorck-ratings.core :as core]
+            [yorck-ratings.core_sync :as core]
             [yorck-ratings.view :as view]
             [config.core :refer [env]]
             [clojure.core.async :as a])

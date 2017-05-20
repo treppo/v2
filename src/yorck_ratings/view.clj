@@ -33,7 +33,7 @@
               }
               a { color: black; }
               .highlighted {
-                background-color: yellow;
+                background-color: lightyellow;
                 margin-left: -.4rem;
                 margin-right: -.4rem;
                 padding-left: .4rem;

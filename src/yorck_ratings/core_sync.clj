@@ -1,14 +1,14 @@
-(ns yorck-ratings.core
+(ns yorck-ratings.core-sync
   (:require [org.httpkit.client :as http]
             [clojure.core.async :as a]
             [hickory.select :as h]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [yorck-ratings.yorck-info :as yorck-info])
   (:use [hickory.core])
   (:import (java.util.regex Pattern)
            (java.net URLEncoder)))
 
 (def imdb-base-url "https://m.imdb.com")
-(def yorck-base-url "https://www.yorck.de")
 
 (defrecord RatedMovie [rating rating-count imdb-title imdb-url yorck-title yorck-url])
 (defn make-rated-movie
@@ -20,7 +20,7 @@
            yorck-url    ""}}]
   (RatedMovie. rating rating-count imdb-title imdb-url yorck-title yorck-url))
 
-(def DEFAULT-TIMEOUT 10000)
+(def DEFAULT-TIMEOUT 60000)
 
 (defn- error-message [url cause]
   (str "Error fetching URL \"" url "\": " cause))
@@ -35,9 +35,6 @@
                   (a/put! error-ch (error-message url status))
                   (a/put! result-ch (as-hickory (parse body))))))))
 
-(defn fetch-yorck-list [result-ch error-ch]
-  (async-get (str yorck-base-url "/filme?filter_today=true") result-ch error-ch))
-
 (defn fetch-imdb-sp [error-ch {title :yorck-title} result-ch]
   (let [enc-title (URLEncoder/encode title "UTF-8")
         url (str imdb-base-url "/find?q=" enc-title)]
@@ -48,38 +45,6 @@
     (let [movie (a/<! movie-ch)]
       (async-get (:imdb-url movie) result-ch error-ch)
       movie)))
-
-(defn rotate-article [title]
-  (let [pattern (Pattern/compile "^([\\w\\s]+), (Der|Die|Das|The)", Pattern/UNICODE_CHARACTER_CLASS)]
-    (str/replace-first title pattern "$2 $1")))
-
-(defn remove-dimension [title]
-  (let [pattern (Pattern/compile " (- )?2D.*", Pattern/UNICODE_CHARACTER_CLASS)]
-    (str/replace-first title pattern "")))
-
-(defn yorck-titles [yorck-page]
-  (->> yorck-page
-       (h/select (h/descendant
-                   (h/class :movie-details)
-                   (h/tag :h2)))
-       (mapcat :content)
-       (mapv rotate-article)
-       (mapv remove-dimension)))
-
-(defn yorck-urls [yorck-page]
-  (->> yorck-page
-       (h/select (h/descendant
-                   (h/class :movie-details)
-                   (h/tag :a)))
-       (mapv :attrs)
-       (map :href)
-       (map #(str yorck-base-url %))))
-
-(defn yorck-titles-urls [yorck-page]
-  (map #(make-rated-movie {:yorck-title %1
-                           :yorck-url   %2})
-       (yorck-titles yorck-page)
-       (yorck-urls yorck-page)))
 
 (defn imdb-title [sp]
   (->> sp
@@ -146,32 +111,48 @@
   (a/go
     (let [movie (a/<! movie-ch)
           page (a/<! dp-ch)]
-      (merge movie {:rating (imdb-rating page)
+      (merge movie {:rating       (imdb-rating page)
                     :rating-count (imdb-rating-count page)}))))
 
-(defn remove-sneak-preview [movies]
-  (remove #(str/includes? (str/lower-case (:yorck-title %)) "sneak") movies))
+(defn get-imdb-search-result [title]
+  {:imdb-url "" :imdb-title ""})
 
-(defn rated-movies [cb]
-  (a/go
-    (let [result-ch (a/chan 1 (comp
-                                (map yorck-titles-urls)
-                                (map remove-sneak-preview)))
-          error-ch (a/chan)
-          imdb-sp-chs (repeatedly (partial a/chan 1))
-          imdb-dp-chs (repeatedly (partial a/chan 1))
+(defn get-imdb-detail-info [url]
+  {:rating 0.0 :rating-count 0})
 
-          _ (fetch-yorck-list result-ch error-ch)
+(defn rated-movies
+  ([get-yorck-info-fn get-imdb-search-result-fn get-imdb-detail-info-fn]
+   (let [yorck-info (get-yorck-info-fn)
+         imdb-search-result (->> yorck-info
+                                 (map :yorck-title)
+                                 (map get-imdb-search-result-fn))
+         imdb-detail-info (->> imdb-search-result
+                               (map :imdb-url)
+                               (map get-imdb-detail-info-fn))
+         merged-infos (map merge yorck-info imdb-search-result imdb-detail-info)
+         movies (map make-rated-movie merged-infos)]
+     (reverse (sort-by :rating movies))))
+  ([] (rated-movies yorck-info/get-info get-imdb-search-result get-imdb-detail-info)))
 
-          yorck-infos (a/<! result-ch)
-
-          _ (doall (map (partial fetch-imdb-sp error-ch) yorck-infos imdb-sp-chs))
-          movie-chs (map with-imdb-sp-infos yorck-infos imdb-sp-chs)
-          m-chs (doall (map (partial fetch-imdb-dp error-ch) movie-chs imdb-dp-chs))
-          rated-movie-chs (map with-rating m-chs imdb-dp-chs)]
-
-      (a/map (fn [& movies] (cb (reverse (sort-by :rating movies)))) rated-movie-chs)
-      (a/close! result-ch)
-      (a/close! error-ch)
-      (map a/close! imdb-sp-chs)
-      (map a/close! imdb-dp-chs))))
+;(a/go
+;  (let [result-ch (a/chan 1 (comp
+;                              (map yorck-titles-urls)
+;                              (map remove-sneak-preview)))
+;        error-ch (a/chan)
+;        imdb-sp-chs (repeatedly (partial a/chan 1))
+;        imdb-dp-chs (repeatedly (partial a/chan 1))
+;
+;        _ (fetch-yorck-list result-ch error-ch)
+;
+;        yorck-infos (a/<! result-ch)
+;
+;        _ (doall (map (partial fetch-imdb-sp error-ch) yorck-infos imdb-sp-chs))
+;        movie-chs (map with-imdb-sp-infos yorck-infos imdb-sp-chs)
+;        m-chs (doall (map (partial fetch-imdb-dp error-ch) movie-chs imdb-dp-chs))
+;        rated-movie-chs (map with-rating m-chs imdb-dp-chs)]
+;
+;    (a/map (fn [& movies] (cb (reverse (sort-by :rating movies)))) rated-movie-chs)
+;    (a/close! result-ch)
+;    (a/close! error-ch)
+;    (map a/close! imdb-sp-chs)
+;    (map a/close! imdb-dp-chs))))
