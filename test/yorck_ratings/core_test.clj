@@ -49,25 +49,9 @@
 (deftest async-get-test
   (testing "writes parsed successful get request result to channel"
     (with-fake-http [yorck-list-url yorck-list-fixture]
-                    (let [result-ch (a/chan 1)
-                          error-ch (a/chan 1)]
-                      (async-get yorck-list-url result-ch error-ch)
-                      (is (= parsed-yorck-list-fixture (a/<!! result-ch))))))
-
-  (testing "writes request error to error channel"
-    (let [result-ch (a/chan 1)
-          error-ch (a/chan 1)
-          expected "Error fetching URL \"http://non-existant-url.kentucky\": non-existant-url.kentucky: unknown error"]
-      (async-get "http://non-existant-url.kentucky" result-ch error-ch)
-      (is (= expected (a/<!! error-ch)))))
-
-  (testing "writes successful request with exceptional response to error channel"
-    (with-fake-http ["http://m.imdb.com/non-existant-uri" 404]
-                    (let [result-ch (a/chan 1)
-                          error-ch (a/chan 1)
-                          expected "Error fetching URL \"http://m.imdb.com/non-existant-uri\": 404"]
-                      (async-get "http://m.imdb.com/non-existant-uri" result-ch error-ch)
-                      (is (= expected (a/<!! error-ch)))))))
+                    (let [result-ch (a/chan 1)]
+                      (async-get yorck-list-url result-ch)
+                      (is (= parsed-yorck-list-fixture (a/<!! result-ch)))))))
 
 (deftest yorck-titles-test
   (testing "returns yorck movie titles"
