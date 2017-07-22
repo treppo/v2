@@ -4,13 +4,13 @@
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [http-kit "2.1.19"]
-                 [ring/ring-devel "1.4.0"]
-                 [ring/ring-core "1.4.0"]
+                 [http-kit "2.2.0"]
+                 [ring/ring-devel "1.6.2"]
+                 [ring/ring-core "1.6.2"]
                  [http-kit.fake "0.2.2"]
                  [luminus/config "0.8"]
-                 [hickory "0.6.0"]
-                 [org.clojure/core.async "0.2.374"]]
+                 [hickory "0.7.1"]
+                 [org.clojure/core.async "0.3.443"]]
   :main ^:skip-aot yorck-ratings.web
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
