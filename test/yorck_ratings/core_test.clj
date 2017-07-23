@@ -89,7 +89,7 @@
   (testing "returns imdb movie titles"
     (let [expected {:imdb-title "The Hateful Eight"
                     :imdb-url   "https://m.imdb.com/title/tt3460252/"}]
-      (is (= expected (imdb-sp-infos parsed-hateful-8-sp-fixture))))))
+      (is (= expected (imdb-search-infos parsed-hateful-8-sp-fixture))))))
 
 (deftest imdb-rating-test
   (testing "returns imdb movie rating"
