@@ -74,12 +74,18 @@
        (yorck-titles yorck-page)
        (yorck-urls yorck-page)))
 
-(defn fetch-yorck-infos []
-  (async/go
-    (let [yorck-page (async/<! (get-async (str yorck-base-url "/filme?filter_today=true")))]
-      (->> yorck-page
-           (yorck-titles-urls)
-           (remove-sneak-preview)))))
+(defn- get-yorck-page-async []
+  (get-async (str yorck-base-url "/filme?filter_today=true")))
+
+(defn yorck-infos
+  ([result-chan] (yorck-infos result-chan get-yorck-page-async))
+  ([result-chan get-page-fn]
+   (async/go
+     (let [yorck-page (async/<! (get-page-fn))]
+       (async/>! result-chan (->> yorck-page
+             (yorck-titles-urls)
+             (remove-sneak-preview))))
+     (async/close! result-chan))))
 
 (defn imdb-title [search-page]
   (->> search-page
@@ -139,43 +145,52 @@
   {:rating       (imdb-rating detail-page)
    :rating-count (imdb-rating-count detail-page)})
 
-(defn- fetch-imdb-detail [rated-movie result-chan]
-  (async/go
-    (let [detail-page (async/<! (get-async (:imdb-url rated-movie)))
-          updated (merge rated-movie (imdb-detail-infos detail-page))]
-      (async/>! result-chan updated)
-      (async/close! result-chan))))
+(defn imdb-detail
+  ([rated-movie result-chan] (imdb-detail rated-movie result-chan get-async))
+  ([rated-movie result-chan get-page-fn]
+   (async/go
+     (let [detail-page (async/<! (get-page-fn (:imdb-url rated-movie)))
+           updated (merge rated-movie (imdb-detail-infos detail-page))]
+       (async/>! result-chan updated))
+     (async/close! result-chan))))
 
 (defn imdb-search-infos [search-page]
   {:imdb-title (imdb-title search-page)
    :imdb-url   (imdb-url search-page)})
 
-(defn fetch-imdb-search [rated-movie result-chan]
-  (async/go
-    (let [title (:yorck-title rated-movie)
-          enc-title (URLEncoder/encode title "UTF-8")
-          url (str imdb-base-url "/find?q=" enc-title)
-          search-page (async/<! (get-async url))
-          updated (merge rated-movie (imdb-search-infos search-page))]
-      (async/>! result-chan updated)
-      (async/close! result-chan))))
+(defn- get-search-page [title]
+  (let [enc-title (URLEncoder/encode title "UTF-8")
+        url (str imdb-base-url "/find?q=" enc-title)]
+    (async/go (async/<! (get-async url)))))
+
+(defn imdb-search
+  ([rated-movie result-chan] (imdb-search rated-movie result-chan get-search-page))
+  ([rated-movie result-chan get-search-page-fn]
+   (async/go
+     (let [search-page (async/<! (get-search-page-fn (:yorck-title rated-movie)))
+           updated (merge rated-movie (imdb-search-infos search-page))]
+       (async/>! result-chan updated))
+     (async/close! result-chan))))
 
 (defn- sort-by-rating [movies]
   (reverse (sort-by :rating movies)))
 
 (defn rated-movies [callback]
   (let [yorck-infos-chan (async/chan)
+        yorck-infos-split-chan (async/chan)
         imdb-search-chan (async/chan)
         imdb-detail-chan (async/chan)]
 
-    (async/go
-      (let [yorck-infos (async/<! (fetch-yorck-infos))]
-        (doseq [yorck-info yorck-infos]
-          (async/>! yorck-infos-chan yorck-info))
-        (async/close! yorck-infos-chan)))
+    (yorck-infos yorck-infos-chan)
 
-    (async/pipeline-async 1 imdb-search-chan fetch-imdb-search yorck-infos-chan)
-    (async/pipeline-async 1 imdb-detail-chan fetch-imdb-detail imdb-search-chan)
+    (async/go
+      (let [yorck-infos (async/<! yorck-infos-chan)]
+        (doseq [yorck-info yorck-infos]
+          (async/>! yorck-infos-split-chan yorck-info))
+        (async/close! yorck-infos-split-chan)))
+
+    (async/pipeline-async 8 imdb-search-chan imdb-search yorck-infos-split-chan)
+    (async/pipeline-async 8 imdb-detail-chan imdb-detail imdb-search-chan)
 
     (async/go-loop [movies []]
       (if-let [movie (async/<! imdb-detail-chan)]
