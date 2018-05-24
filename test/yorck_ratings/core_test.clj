@@ -46,11 +46,10 @@
                       (Thread/sleep 500)
                       (is (= @actual expected))))))
 
-(deftest async-get-test
+(deftest get-async-test
   (testing "writes parsed successful get request result to channel"
     (with-fake-http [yorck-list-url yorck-list-fixture]
-                    (let [result-ch (a/chan 1)]
-                      (async-get yorck-list-url result-ch)
+                    (let [result-ch (get-async yorck-list-url)]
                       (is (= parsed-yorck-list-fixture (a/<!! result-ch)))))))
 
 (deftest yorck-titles-test

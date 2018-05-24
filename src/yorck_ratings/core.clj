@@ -25,29 +25,19 @@
 (defn- error-message [url cause]
   (str "Error fetching URL \"" url "\": " cause))
 
-(defn async-get [url result-chan]
-  (http/get url {:timeout DEFAULT-TIMEOUT}
-            (fn [{:keys [status body error]}]
-              (if error
-                (let [{cause :cause} (Throwable->map error)]
-                  (error-message url cause))
-                (if (>= status 400)
-                  (error-message url status)
-                  (async/go (async/>! result-chan (as-hickory (parse body)))))))))
-
-(defn fetch-yorck-list [result-chan]
-  (async-get (str yorck-base-url "/filme?filter_today=true") result-chan))
-
-(defn fetch-imdb-sp [{title :yorck-title} result-chan]
-  (let [enc-title (URLEncoder/encode title "UTF-8")
-        url (str imdb-base-url "/find?q=" enc-title)]
-    (async-get url result-chan)))
-
-(defn fetch-imdb-detail [movie-chan result-chan]
-  (async/go
-    (let [movie (async/<! movie-chan)]
-      (async-get (:imdb-url movie) result-chan)
-      movie)))
+(defn get-async [url]
+  (let [out (async/chan)]
+    (http/get url {:timeout DEFAULT-TIMEOUT}
+              (fn [{:keys [status body error]}]
+                (async/go
+                  (if error
+                    (let [{cause :cause} (Throwable->map error)]
+                      (error-message url cause))            ; TODO
+                    (if (>= status 400)
+                      (error-message url status)            ; TODO
+                      (async/>! out (as-hickory (parse body)))))
+                  (async/close! out))))
+    out))
 
 (defn rotate-article [title]
   (let [pattern (Pattern/compile "^([\\w\\s]+), (Der|Die|Das|The)", Pattern/UNICODE_CHARACTER_CLASS)]
@@ -75,11 +65,21 @@
        (map :href)
        (map #(str yorck-base-url %))))
 
+(defn- remove-sneak-preview [movies]
+  (remove #(string/includes? (string/lower-case (:yorck-title %)) "sneak") movies))
+
 (defn yorck-titles-urls [yorck-page]
   (map #(make-rated-movie {:yorck-title %1
                            :yorck-url   %2})
        (yorck-titles yorck-page)
        (yorck-urls yorck-page)))
+
+(defn fetch-yorck-infos []
+  (async/go
+    (let [yorck-page (async/<! (get-async (str yorck-base-url "/filme?filter_today=true")))]
+      (->> yorck-page
+           (yorck-titles-urls)
+           (remove-sneak-preview)))))
 
 (defn imdb-title [search-page]
   (->> search-page
@@ -115,7 +115,7 @@
          :content
          first
          Double/parseDouble)
-    (catch Exception e 0.0)))
+    (catch Exception _ 0.0)))
 
 (defn- remove-comma [a-string]
   (string/replace-first a-string "," ""))
@@ -133,46 +133,51 @@
          last
          remove-comma
          Integer/parseInt)
-    (catch Exception e 0)))
+    (catch Exception _ 0)))
+
+(defn- imdb-detail-infos [detail-page]
+  {:rating       (imdb-rating detail-page)
+   :rating-count (imdb-rating-count detail-page)})
+
+(defn- fetch-imdb-detail [rated-movie result-chan]
+  (async/go
+    (let [detail-page (async/<! (get-async (:imdb-url rated-movie)))
+          updated (merge rated-movie (imdb-detail-infos detail-page))]
+      (async/>! result-chan updated)
+      (async/close! result-chan))))
 
 (defn imdb-search-infos [search-page]
   {:imdb-title (imdb-title search-page)
    :imdb-url   (imdb-url search-page)})
 
-(defn with-imdb-search-infos [movie chan]
-  (async/go (merge movie (imdb-search-infos (async/<! chan)))))
-
-(defn with-rating [movie-chan imdb-detail-chan]
+(defn fetch-imdb-search [rated-movie result-chan]
   (async/go
-    (let [movie (async/<! movie-chan)
-          detail-page (async/<! imdb-detail-chan)]
-      (merge movie {:rating       (imdb-rating detail-page)
-                    :rating-count (imdb-rating-count detail-page)}))))
+    (let [title (:yorck-title rated-movie)
+          enc-title (URLEncoder/encode title "UTF-8")
+          url (str imdb-base-url "/find?q=" enc-title)
+          search-page (async/<! (get-async url))
+          updated (merge rated-movie (imdb-search-infos search-page))]
+      (async/>! result-chan updated)
+      (async/close! result-chan))))
 
-(defn remove-sneak-preview [movies]
-  (remove #(string/includes? (string/lower-case (:yorck-title %)) "sneak") movies))
-
-(defn sort-by-rating [movies]
+(defn- sort-by-rating [movies]
   (reverse (sort-by :rating movies)))
 
 (defn rated-movies [callback]
-  (async/go
-    (let [yorck-chan (async/chan 1 (comp
-                                    (map yorck-titles-urls)
-                                    (map remove-sneak-preview)))
-          imdb-search-chs (repeatedly (partial async/chan 1))
-          imdb-detail-chs (repeatedly (partial async/chan 1))
+  (let [yorck-infos-chan (async/chan)
+        imdb-search-chan (async/chan)
+        imdb-detail-chan (async/chan)]
 
-          _ (fetch-yorck-list yorck-chan)
+    (async/go
+      (let [yorck-infos (async/<! (fetch-yorck-infos))]
+        (doseq [yorck-info yorck-infos]
+          (async/>! yorck-infos-chan yorck-info))
+        (async/close! yorck-infos-chan)))
 
-          yorck-infos (async/<! yorck-chan)
+    (async/pipeline-async 1 imdb-search-chan fetch-imdb-search yorck-infos-chan)
+    (async/pipeline-async 1 imdb-detail-chan fetch-imdb-detail imdb-search-chan)
 
-          _ (doall (map #(fetch-imdb-sp %1 %2) yorck-infos imdb-search-chs))
-          movie-chs (map with-imdb-search-infos yorck-infos imdb-search-chs)
-          m-chs (doall (map #(fetch-imdb-detail %1 %2) movie-chs imdb-detail-chs))
-          rated-movie-chs (map with-rating m-chs imdb-detail-chs)]
-
-      (async/map (fn [& movies] (callback (sort-by-rating movies))) rated-movie-chs)
-      (async/close! yorck-chan)
-      (map async/close! imdb-search-chs)
-      (map async/close! imdb-detail-chs))))
+    (async/go-loop [movies []]
+      (if-let [movie (async/<! imdb-detail-chan)]
+        (recur (conj movies movie))
+        (callback (sort-by-rating movies))))))
