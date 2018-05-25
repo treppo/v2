@@ -83,31 +83,31 @@
    (async/go
      (let [yorck-page (async/<! (get-page-fn))]
        (async/>! result-chan (->> yorck-page
-             (yorck-titles-urls)
-             (remove-sneak-preview))))
+                                  (yorck-titles-urls)
+                                  (remove-sneak-preview))))
      (async/close! result-chan))))
 
 (defn imdb-title [search-page]
   (->> search-page
        (hickory/select (hickory/descendant
-                         (hickory/class :posters)
-                         (hickory/class :poster)
-                         (hickory/class :title)
-                         (hickory/tag :a)))
+                         (hickory/class :subpage)
+                         (hickory/class :h3)))
        first
        :content
-       first))
+       first
+       string/trim))
+
+(defn- remove-parameters [path]
+  (first (string/split path (Pattern/compile "\\?", Pattern/UNICODE_CHARACTER_CLASS))))
 
 (defn imdb-url [search-page]
   (->> search-page
        (hickory/select (hickory/descendant
-                         (hickory/class :posters)
-                         (hickory/class :poster)
-                         (hickory/class :title)
-                         (hickory/tag :a)))
+                         (hickory/class :subpage)))
        (mapv :attrs)
        (mapv :href)
        first
+       remove-parameters
        (str imdb-base-url)))
 
 (defn imdb-rating [detail-page]
@@ -141,22 +141,21 @@
          Integer/parseInt)
     (catch Exception _ 0)))
 
-(defn- imdb-detail-infos [detail-page]
-  {:rating       (imdb-rating detail-page)
-   :rating-count (imdb-rating-count detail-page)})
+(defn- with-imdb-detail-infos [rated-movie detail-page]
+  (merge rated-movie {:rating       (imdb-rating detail-page)
+                      :rating-count (imdb-rating-count detail-page)}))
 
 (defn imdb-detail
   ([rated-movie result-chan] (imdb-detail rated-movie result-chan get-async))
   ([rated-movie result-chan get-page-fn]
    (async/go
-     (let [detail-page (async/<! (get-page-fn (:imdb-url rated-movie)))
-           updated (merge rated-movie (imdb-detail-infos detail-page))]
-       (async/>! result-chan updated))
+     (let [detail-page (async/<! (get-page-fn (:imdb-url rated-movie)))]
+       (async/>! result-chan (with-imdb-detail-infos rated-movie detail-page)))
      (async/close! result-chan))))
 
-(defn imdb-search-infos [search-page]
-  {:imdb-title (imdb-title search-page)
-   :imdb-url   (imdb-url search-page)})
+(defn with-imdb-search-infos [rated-movie search-page]
+  (merge rated-movie {:imdb-title (imdb-title search-page)
+                      :imdb-url   (imdb-url search-page)}))
 
 (defn- get-search-page [title]
   (let [enc-title (URLEncoder/encode title "UTF-8")
@@ -165,11 +164,10 @@
 
 (defn imdb-search
   ([rated-movie result-chan] (imdb-search rated-movie result-chan get-search-page))
-  ([rated-movie result-chan get-search-page-fn]
+  ([rated-movie result-chan get-page-fn]
    (async/go
-     (let [search-page (async/<! (get-search-page-fn (:yorck-title rated-movie)))
-           updated (merge rated-movie (imdb-search-infos search-page))]
-       (async/>! result-chan updated))
+     (let [search-page (async/<! (get-page-fn (:yorck-title rated-movie)))]
+       (async/>! result-chan (with-imdb-search-infos rated-movie search-page)))
      (async/close! result-chan))))
 
 (defn- sort-by-rating [movies]

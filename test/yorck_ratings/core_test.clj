@@ -29,14 +29,14 @@
                      "https://m.imdb.com/title/tt3460252/" hateful-8-dp-fixture
                      "https://m.imdb.com/find?q=Carol" carol-sp-fixture
                      "https://m.imdb.com/title/tt2402927/" carol-dp-fixture]
-                    (let [expected [(make-rated-movie {:rating       8.0
-                                                       :rating-count 123336
+                    (let [expected [(make-rated-movie {:rating       7.8
+                                                       :rating-count 391351
                                                        :imdb-title   "The Hateful Eight"
                                                        :imdb-url     "https://m.imdb.com/title/tt3460252/"
                                                        :yorck-title  "The Hateful 8"
                                                        :yorck-url    "https://www.yorck.de/filme/hateful-8-the"})
-                                    (make-rated-movie {:rating       7.6
-                                                       :rating-count 22728
+                                    (make-rated-movie {:rating       7.2
+                                                       :rating-count 89891
                                                        :imdb-title   "Carol"
                                                        :imdb-url     "https://m.imdb.com/title/tt2402927/"
                                                        :yorck-title  "Carol"
@@ -80,24 +80,28 @@
       (is (= expected (imdb-title parsed-hateful-8-sp-fixture))))))
 
 (deftest imdb-urls-test
-  (testing "returns imdb movie urls"
+  (testing "returns imdb movie urls with parameters"
     (let [expected "https://m.imdb.com/title/tt3460252/"]
       (is (= expected (imdb-url parsed-hateful-8-sp-fixture))))))
 
 (deftest imdb-titles-urls-test
   (testing "returns imdb movie titles"
-    (let [expected {:imdb-title "The Hateful Eight"
-                    :imdb-url   "https://m.imdb.com/title/tt3460252/"}]
-      (is (= expected (imdb-search-infos parsed-hateful-8-sp-fixture))))))
+    (let [movie (make-rated-movie {:yorck-title "Carol"
+                                    :yorck-url   "https://www.yorck.de/filme/carol"})
+          expected (make-rated-movie {:yorck-title "Carol"
+                                      :yorck-url   "https://www.yorck.de/filme/carol"
+                                      :imdb-title  "The Hateful Eight"
+                                      :imdb-url    "https://m.imdb.com/title/tt3460252/"})]
+      (is (= expected (with-imdb-search-infos movie parsed-hateful-8-sp-fixture))))))
 
 (deftest imdb-rating-test
   (testing "returns imdb movie rating"
-    (let [expected 8.0]
+    (let [expected 7.8]
       (is (= expected (imdb-rating parsed-hateful-8-dp-fixture))))))
 
 (deftest imdb-rating-count-test
   (testing "returns imdb movie rating count"
-    (let [expected 123336]
+    (let [expected 391351]
       (is (= expected (imdb-rating-count parsed-hateful-8-dp-fixture))))))
 
 (deftest rotate-article-test
