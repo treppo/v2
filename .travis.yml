@@ -1,5 +1,7 @@
 language: clojure
 
+script: lein midje
+
 deploy:
   provider: heroku
   api_key:

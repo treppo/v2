@@ -1,10 +1,9 @@
 (ns yorck-ratings.web
-  (:use [org.httpkit.server :only [run-server with-channel send! close]])
   (:require [ring.middleware.reload :as reload]
             [yorck-ratings.core :as core]
             [yorck-ratings.view :as view]
             [config.core :refer [env]]
-            [clojure.core.async :as a])
+            [org.httpkit.server :refer [run-server with-channel send! close]])
   (:gen-class))
 
 (defn not-found []
