@@ -3,33 +3,60 @@
             [yorck-ratings.http :as http]
             [clojure.string :as string]
             [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop]])
-  (:import (java.net URLEncoder)
-           (java.util.regex Pattern)))
+  (:import (java.net URLEncoder)))
 
 (def base-url "https://m.imdb.com")
 
 (defn- parse-title [search-page]
-  (->> search-page
-       (selector/select (selector/descendant
-                          (selector/class :subpage)
-                          (selector/class :h3)))
-       first
-       :content
-       first
-       string/trim))
+  (try
+    (->> search-page
+        (selector/select (selector/descendant
+                           (selector/class :subpage)
+                           (selector/class :h3)))
+        first
+        :content
+        first
+        string/trim)
+    (catch Exception _ nil)))
 
 (defn- remove-parameters [path]
-  (first (string/split path (Pattern/compile "\\?", Pattern/UNICODE_CHARACTER_CLASS))))
+  (first (string/split path #"\?")))
 
 (defn- parse-url [search-page]
-  (->> search-page
-       (selector/select (selector/descendant
-                          (selector/class :subpage)))
-       (mapv :attrs)
-       (mapv :href)
-       first
-       remove-parameters
-       (str base-url)))
+  (try
+    (->> search-page
+        (selector/select (selector/descendant
+                           (selector/class :subpage)))
+        (mapv :attrs)
+        (mapv :href)
+        first
+        remove-parameters
+        (str base-url))
+    (catch Exception _ nil)))
+
+(defn- with-search-infos [rated-movie [title url]]
+  (merge rated-movie {:imdb-title title
+                      :imdb-url   url}))
+
+(defn get-search-page [yorck-title]
+  (go
+    (let [enc-title (URLEncoder/encode yorck-title "UTF-8")
+          search-url (str base-url "/find?q=" enc-title)
+          page (<! (http/get-async search-url))
+          title (parse-title page)
+          url (parse-url page)]
+      (if (and title url)
+        [title url]
+        []))))
+
+(defn search [get-infos-fn rated-movie result-chan]
+  (go
+    (let [search-infos (<! (get-infos-fn (:yorck-title rated-movie)))]
+      (if (empty? search-infos)
+        (>! result-chan rated-movie)
+        (>! result-chan (with-search-infos rated-movie search-infos))))
+    (close! result-chan))
+  result-chan)
 
 (defn rating [detail-page]
   (try
@@ -75,23 +102,5 @@
   (go
     (let [detail-infos (<! (get-page-fn (:imdb-url rated-movie)))]
       (>! result-chan (with-detail-infos rated-movie detail-infos)))
-    (close! result-chan))
-  result-chan)
-
-(defn- with-search-infos [rated-movie [title url]]
-  (merge rated-movie {:imdb-title title
-                      :imdb-url   url}))
-
-(defn get-search-page [yorck-title]
-  (go
-    (let [enc-title (URLEncoder/encode yorck-title "UTF-8")
-          search-url (str base-url "/find?q=" enc-title)
-          page (<! (http/get-async search-url))]
-      [(parse-title page) (parse-url page)])))
-
-(defn search [get-page-fn rated-movie result-chan]
-  (go
-    (let [search-infos (<! (get-page-fn (:yorck-title rated-movie)))]
-      (>! result-chan (with-search-infos rated-movie search-infos)))
     (close! result-chan))
   result-chan)

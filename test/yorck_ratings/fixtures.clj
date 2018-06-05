@@ -8,6 +8,13 @@
        (io/resource)
        (slurp)))
 
+(def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
+(def yorck-list-page (load-fixture "yorck_list.html"))
+
+(def no-search-result-yorck-title "No search result")
+(def no-search-result-search-page (load-fixture "no_search_result_search_page.html"))
+(def no-search-result-search-url "https://m.imdb.com/find?q=No+search+result")
+
 (def carol-yorck-title "Carol")
 (def carol-yorck-url "https://www.yorck.de/filme/carol")
 (def carol-search-page (load-fixture "carol_search_page.html"))
@@ -22,9 +29,6 @@
                                           :imdb-url     carol-detail-url
                                           :yorck-title  carol-yorck-title
                                           :yorck-url    carol-yorck-url}))
-
-(def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
-(def yorck-list-page (load-fixture "yorck_list.html"))
 
 (def hateful-8-yorck-title "Hateful 8, The")
 (def hateful-8-yorck-url "https://www.yorck.de/filme/hateful-8-the")
