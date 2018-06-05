@@ -14,9 +14,9 @@
   :main ^:skip-aot yorck-ratings.web
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
-             :dev     {:resource-paths ["test/resources" "config/dev"]
+             :dev     {:resource-paths ["config/dev"]
                        :dependencies   [[midje "1.9.1"] [midje-notifier "0.2.0"]]
                        :plugins        [[lein-midje "3.2.1"]]}
-             :test    {:resource-paths ["test/resources" "config/test"]}}
-  :min-lein-version "2.4.0"
+             :midje    {:resource-paths ["test/resources" "config/test"]}}
+  :min-lein-version "2.8.0"
   :uberjar-name "yorck-ratings-standalone.jar")
