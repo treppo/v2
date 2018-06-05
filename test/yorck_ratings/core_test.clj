@@ -14,5 +14,5 @@
                                       fixtures/carol-rated-movie]
                             actual (atom [])]
                         (rated-movies (fn [movies] (swap! actual concat movies)))
-                        (Thread/sleep 200)
+                        (Thread/sleep 500)
                         @actual => expected)))
