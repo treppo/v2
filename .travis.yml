@@ -1,19 +1,15 @@
 sudo: required
-
 script:
 - "./build.sh"
-
 services:
 - docker
-
 jdk:
 - oraclejdk8
-
 env:
   global:
-    secure: V3omTH1l3TfcNNGyrHP+n5r8QMA64qtXF7czSqeR5dOZvxohJtefLPLRcNPE/Ga5MCvgxYzp+9JPMIQfFg2OsMZw30ZnA5jl9BA7VlfYzimTk+JUcJboAtSk+wANDl81yWOmv6BILPUhimVFxEXf4gTKymuk1RV2ewOBtgMYzpXMIBu3fKOLXpw8Lg3hmZFpSOjVzk9oOJazLbl+xVPLb57knxZx07gtbQGBxamHG2mCjQltEfIPufPYnlmHs4L5G8/NpuFzcQ2GY0GToSRmGxXy8ivU+wThgN/J+IPOstuopMeojYrVuENvvuIZMXiVUGUOa/ZvF2XWJS01HF9yrnOwbKIQiOtUlvLW6ezXM9dvY9SsJ+p3WQgtZ7zbJ7pmuBVCJ97KVBsT5HDO7UA6C4jEL8l6aDpK0iG0ZKZm7N5G1C82tw9l+6Y8tUIBW/bDqD/O6Fp3fCcq45c7zIwzY/mWroh3nRGrtrJh1d76q96bc88alcdryZKIRvEvFITQu6zw6nv/+aB/2QreIttMf6pu5ZZYT600xTzrRUTFKKPjUoFulsPolAgU+q5atLL8cQaKhPj5PxhIQV7pGdzQHkqMCRJTLXagr7L8QuqKk8iYfQRzK1z5iuScmxCnCjK2PQA6juxxh2rEPKievwbvBaeU74x4HJ9vcLKA1+2Wz6s=
-
+    secure: UCn7LNstpquRwi2wv0LoPxhoa7EIaJJh1//f0y+/RPVM1ZQr4a/q10iNRwmhWjXZ+4v5dTqXuUC/Hl71Qaq+OPVobRrIPYN7AqIMNK879p9dVDPAafh5eHydGYITcJobcpX3suoNNSJwEfpTkU0o2Q+1+jSjY+N3ooPYBU5ggLjePf9PCpOYBalqUGJZpgUvDW0a+rO5+VW6zwANEu7j6jiFkCSaBH5ENeWJyfPEbLtMOLBlWEzYJzzWQyzjWUdCxczOo93YQQVMMXVGA8WzROhH3x2qzaGFHxFGpgfpjx7g2AS/dspOTr81wTMSSYzCiDIuWEpyYs81ya1PdIDa4iRHUbjt928S3DYjjOKOCsX+n2MsiJE3Gp3caaqqR+Ezahrouoihi3mjbGcnSgN5n5OOqhcJiBRp970W7hu4thdDVYvtwQDyrhOREB/DOsGxYE76uHUbEYechcrE4I8rUnoou/IjErn86IYfwqe906vtS/NcMzdUjQN8kmHGhYTeOavYSqiqEbIZWWfrr+bOhpJUqkPdQBFLDMicJyNNu/aNNx/qoiU8y7IL8aaco5IY4dHYL8CGhLk4Uj2Y9A/vW0LkzejQgRSz+HXQLbuPt7YkQjCBK0in3/PAOyVbCRa7yjeKXPrvy8ENC5Ys5BcDFYllmaXAafx9+fkLTwRKf3s=
 after_success:
-  - docker login -u _ -p "$HEROKU_TOKEN" registry.heroku.com
+  - docker login -u _ -p "$HEROKU_API_KEY" registry.heroku.com
   - docker tag application registry.heroku.com/yorck-ratings/web
   - docker push registry.heroku.com/yorck-ratings/web
+  - heroku container:release web
