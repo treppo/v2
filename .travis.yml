@@ -9,7 +9,4 @@ env:
   global:
     secure: UCn7LNstpquRwi2wv0LoPxhoa7EIaJJh1//f0y+/RPVM1ZQr4a/q10iNRwmhWjXZ+4v5dTqXuUC/Hl71Qaq+OPVobRrIPYN7AqIMNK879p9dVDPAafh5eHydGYITcJobcpX3suoNNSJwEfpTkU0o2Q+1+jSjY+N3ooPYBU5ggLjePf9PCpOYBalqUGJZpgUvDW0a+rO5+VW6zwANEu7j6jiFkCSaBH5ENeWJyfPEbLtMOLBlWEzYJzzWQyzjWUdCxczOo93YQQVMMXVGA8WzROhH3x2qzaGFHxFGpgfpjx7g2AS/dspOTr81wTMSSYzCiDIuWEpyYs81ya1PdIDa4iRHUbjt928S3DYjjOKOCsX+n2MsiJE3Gp3caaqqR+Ezahrouoihi3mjbGcnSgN5n5OOqhcJiBRp970W7hu4thdDVYvtwQDyrhOREB/DOsGxYE76uHUbEYechcrE4I8rUnoou/IjErn86IYfwqe906vtS/NcMzdUjQN8kmHGhYTeOavYSqiqEbIZWWfrr+bOhpJUqkPdQBFLDMicJyNNu/aNNx/qoiU8y7IL8aaco5IY4dHYL8CGhLk4Uj2Y9A/vW0LkzejQgRSz+HXQLbuPt7YkQjCBK0in3/PAOyVbCRa7yjeKXPrvy8ENC5Ys5BcDFYllmaXAafx9+fkLTwRKf3s=
 after_success:
-  - docker login -u _ -p "$HEROKU_API_KEY" registry.heroku.com
-  - docker tag application registry.heroku.com/yorck-ratings/web
-  - docker push registry.heroku.com/yorck-ratings/web
-  - heroku container:release web
+- bash deploy.sh
