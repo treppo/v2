@@ -1,14 +1,19 @@
-language: clojure
+sudo: required
 
-script: lein midje
+script:
+- "./build.sh"
 
-deploy:
-  provider: heroku
-  api_key:
-    secure: Goq9tJjkYRGoi4uXIQkfJsO7i6BRouA2Wa+G4wIz9Hm+J2hgJPyRSZxC7UOhbUpT409gX1S55WoeQLHSl1IIYoKgaOGVEaMAyz8e7RBSVvIYT876SBkb4Q61mDlqv0ePspgIpM8EyqdZ2DkuQ5M5DQLAJLsWxx3+3dzWX8bJUG4voqV72VhXEFTovQvWfJCd1MbFCuoBg5XnEfrtnj1KgTS1k8FaLaHHwCfP+RdZ6Ocr66qj6uYdYqkgFDTLh0IKpns1aFXFxhSEa7JGRVqnRVy39l6q1WpEeeo2q/+Ey2h+0v9u/+7ziQdDVUBqRNHpQ/Ed/mCv7kxAqGNfQE/5FRSRZZMXzv6hUfEtDfqtAKgL/PPGhjmRHpHH8SNQK/ejBaA1ZJrCPj3G1sg3Ku8qMbOcWZnuP+ehadZBo/5F8VNND8TB6BlXcLc7yJLzfEd7Z7VC+BPiLhMoQ3QLzo/U0w0Bikk0oBQdwPLAS/L7jqpdr7CIZt76yUHHzGubGdUGUklzuwV7oifkjvlmeAu8mrg35AoMr/Y2fRKt5vAhANuYUOtZW1kgKLATICiJQluvVOG/UfGlcve++6rkOuq75YigahoU9L4X70pLWWnef8xhjdXvbnUxCH/De0BUQn2852xmmKGqKr1M1WCtJcNS33zgneKDxmCqQQx1dOVD26Y=
-  app: yorck-ratings
-  on:
-    repo: treppo/yorck-ratings-clojure
+services:
+- docker
 
 jdk:
-  - oraclejdk8
+- oraclejdk8
+
+env:
+  global:
+    secure: V3omTH1l3TfcNNGyrHP+n5r8QMA64qtXF7czSqeR5dOZvxohJtefLPLRcNPE/Ga5MCvgxYzp+9JPMIQfFg2OsMZw30ZnA5jl9BA7VlfYzimTk+JUcJboAtSk+wANDl81yWOmv6BILPUhimVFxEXf4gTKymuk1RV2ewOBtgMYzpXMIBu3fKOLXpw8Lg3hmZFpSOjVzk9oOJazLbl+xVPLb57knxZx07gtbQGBxamHG2mCjQltEfIPufPYnlmHs4L5G8/NpuFzcQ2GY0GToSRmGxXy8ivU+wThgN/J+IPOstuopMeojYrVuENvvuIZMXiVUGUOa/ZvF2XWJS01HF9yrnOwbKIQiOtUlvLW6ezXM9dvY9SsJ+p3WQgtZ7zbJ7pmuBVCJ97KVBsT5HDO7UA6C4jEL8l6aDpK0iG0ZKZm7N5G1C82tw9l+6Y8tUIBW/bDqD/O6Fp3fCcq45c7zIwzY/mWroh3nRGrtrJh1d76q96bc88alcdryZKIRvEvFITQu6zw6nv/+aB/2QreIttMf6pu5ZZYT600xTzrRUTFKKPjUoFulsPolAgU+q5atLL8cQaKhPj5PxhIQV7pGdzQHkqMCRJTLXagr7L8QuqKk8iYfQRzK1z5iuScmxCnCjK2PQA6juxxh2rEPKievwbvBaeU74x4HJ9vcLKA1+2Wz6s=
+
+after_success:
+  - docker login -u _ -p "$HEROKU_TOKEN" registry.heroku.com
+  - docker tag application registry.heroku.com/yorck-ratings/web
+  - docker push registry.heroku.com/yorck-ratings/web

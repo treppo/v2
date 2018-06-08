@@ -1,8 +1,6 @@
 (ns yorck-ratings.web
-  (:require [ring.middleware.reload :as reload]
-            [yorck-ratings.core :as core]
+  (:require [yorck-ratings.core :as core]
             [yorck-ratings.view :as view]
-            [config.core :refer [env]]
             [org.httpkit.server :refer [run-server with-channel send! close]])
   (:gen-class))
 
@@ -26,7 +24,4 @@
     (not-found)))
 
 (defn -main [& args]
-  (let [handler (if (:hotreload? env)
-                  (reload/wrap-reload #'async-handler)
-                  async-handler)]
-    (run-server handler {:port (Integer/parseInt (:port env))})))
+  (run-server async-handler {:port (Integer/valueOf (or (System/getenv "PORT") "8000"))}))
