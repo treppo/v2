@@ -16,5 +16,5 @@ FROM frolvlad/alpine-glibc
 
 RUN apk add --no-cache libstdc++
 COPY --from=base /opt/application/target/default/jlink /opt/yorck-ratings
+ENTRYPOINT ["/bin/sh", "-c"]
 CMD /opt/yorck-ratings/bin/yorck-ratings
-
