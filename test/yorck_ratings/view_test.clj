@@ -4,4 +4,9 @@
             [yorck-ratings.fixtures :as fixtures]))
 
 (fact "returns string of movie properties"
-      (movie-item fixtures/carol-rated-movie) => "7.2 (89891) • <a href=\"https://m.imdb.com/title/tt2402927/\">Carol</a> • <a href=\"https://www.yorck.de/filme/carol\">Carol</a>")
+      (movie-item fixtures/carol-rated-movie) =>
+      [:li {:class "rated-movie highlighted"}
+       "7.2 (89891) • "
+       [:a {:href fixtures/carol-detail-url} "Carol"]
+       " • "
+       [:a {:href fixtures/carol-yorck-url} fixtures/carol-yorck-title]])

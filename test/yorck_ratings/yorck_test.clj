@@ -1,7 +1,7 @@
 (ns yorck-ratings.yorck-test
-  (:use midje.sweet
-        org.httpkit.fake)
   (:require [yorck-ratings.yorck :as yorck]
+            [clj-http.fake :refer [with-fake-routes-in-isolation]]
+            [midje.sweet :refer [fact =>]]
             [clojure.core.async :as async]
             [yorck-ratings.rated-movie :as rated-movie]
             [yorck-ratings.fixtures :as fixtures]))
@@ -67,8 +67,9 @@
                           :yorck-url   a-url})])
 
 (fact "pulls titles and urls from yorck page"
-      (with-fake-http [fixtures/yorck-list-url fixtures/yorck-list-page]
-                      (let [expected [[fixtures/carol-yorck-title fixtures/carol-yorck-url]
-                                      [fixtures/hateful-8-yorck-title fixtures/hateful-8-yorck-url]
-                                      ["Sneak FAF" "https://www.yorck.de/filme/sneak-faf"]]]
-                        (async/<!! (yorck/get-yorck-infos-async)) => expected)))
+      (with-fake-routes-in-isolation
+        {fixtures/yorck-list-url (fn [request] {:status 200 :headers {} :body fixtures/yorck-list-page})}
+        (let [expected [[fixtures/carol-yorck-title fixtures/carol-yorck-url]
+                        [fixtures/hateful-8-yorck-title fixtures/hateful-8-yorck-url]
+                        ["Sneak FAF" "https://www.yorck.de/filme/sneak-faf"]]]
+          (async/<!! (yorck/get-yorck-infos-async)) => expected)))

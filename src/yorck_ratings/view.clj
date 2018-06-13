@@ -3,7 +3,11 @@
 
 (defn movie-item [movie]
   (let [{:keys [rating rating-count imdb-title imdb-url yorck-title yorck-url]} movie]
-    (str rating " (" rating-count ") • <a href=\"" imdb-url "\">" imdb-title "</a> • <a href=\"" yorck-url "\">" yorck-title "</a>")))
+    [:li {:class (if (< (:rating movie) 7) "rated-movie" "rated-movie highlighted")}
+     (str rating " (" rating-count ") • ")
+     [:a {:href imdb-url} imdb-title]
+     " • "
+     [:a {:href yorck-url} yorck-title]]))
 
 (defn markup [movies]
   (html5
@@ -43,5 +47,4 @@
      [:h1 "IMDB rated Yorck movies"]
      [:ol
       (for [movie movies]
-        [:li
-         [:span {:class (if (< (:rating movie) 7) "" "highlighted")} (movie-item movie)]])]]))
+        (movie-item movie))]]))

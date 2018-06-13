@@ -2,7 +2,8 @@
   (:require [hickory.select :as selector]
             [yorck-ratings.http :as http]
             [clojure.string :as string]
-            [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop]])
+            [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop]]
+            [yorck-ratings.rated-movie :as rated-movie])
   (:import (java.net URLEncoder)))
 
 (def base-url "https://m.imdb.com")
@@ -100,7 +101,9 @@
 
 (defn detail [get-page-fn rated-movie result-chan]
   (go
-    (let [detail-infos (<! (get-page-fn (:imdb-url rated-movie)))]
-      (>! result-chan (with-detail-infos rated-movie detail-infos)))
+    (if (rated-movie/has-imdb-infos? rated-movie)
+      (let [detail-infos (<! (get-page-fn (:imdb-url rated-movie)))]
+       (>! result-chan (with-detail-infos rated-movie detail-infos)))
+      (>! result-chan rated-movie))
     (close! result-chan))
   result-chan)
