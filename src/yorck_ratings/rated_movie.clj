@@ -33,6 +33,13 @@
     count))
 
 (def rating-threshold 7)
+(def count-threshold 1000)
+
+(defn count-above-threshold [rated-movie]
+  (>= (rating-count rated-movie) count-threshold))
+
+(defn count-below-threshold [rated-movie]
+  (< (rating-count rated-movie) count-threshold))
 
 (defn rating-above-threshold [rated-movie]
   (>= (rating rated-movie) rating-threshold))
@@ -40,8 +47,14 @@
 (defn rating-below-threshold [rated-movie]
   (< (rating rated-movie) rating-threshold))
 
-(defn is-considerable-movie? [rated-movie]
-  (and (has-imdb-rating? rated-movie) (rating-above-threshold rated-movie)))
+(defn hot? [rated-movie]
+  (and (has-imdb-rating? rated-movie) (rating-above-threshold rated-movie) (count-above-threshold rated-movie)))
+
+(defn considerable? [rated-movie]
+  (or
+    (no-imdb-rating? rated-movie)
+    (and (rating-above-threshold rated-movie)
+         (count-below-threshold rated-movie))))
 
 (defn yorck-title [rated-movie]
   (let [[title url] (:yorck-info rated-movie)]
