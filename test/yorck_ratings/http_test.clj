@@ -6,9 +6,10 @@
             [hickory.core :as hickory]
             [yorck-ratings.fixtures :as fixtures]))
 
-(def parsed-yorck-list-fixture (hickory/as-hickory (hickory/parse fixtures/yorck-list-page)))
-
 (fact "writes parsed successful get request result to channel"
-      (with-fake-routes-in-isolation {fixtures/yorck-list-url (fn [request] {:status 200 :headers {} :body fixtures/yorck-list-page})}
-                      (let [result-ch (http/get-async fixtures/yorck-list-url)]
-                        (async/<!! result-ch) => parsed-yorck-list-fixture)))
+      (with-fake-routes-in-isolation
+        {fixtures/yorck-list-url (fixtures/yorck-list-ok)}
+        (let [result-ch (http/get-async fixtures/yorck-list-url)
+              parsed-yorck-list-fixture (hickory/as-hickory (hickory/parse fixtures/yorck-list-page))]
+
+          (async/<!! result-ch) => parsed-yorck-list-fixture)))

@@ -10,13 +10,20 @@
             [ring.mock.request :as mock]
             [yorck-ratings.view :as view]))
 
+(defn- get-rated-movies-html [page-html]
+  (->> page-html
+       (hickory/parse)
+       (hickory/as-hickory)
+       (selector/select (selector/child (selector/class :rated-movie)))
+       (mapv render/hickory-to-html)))
+
 (fact "return rated movie infos sorted by rating"
       (with-fake-routes-in-isolation
-        {fixtures/yorck-list-url       (fn [request] {:status 200 :headers {} :body fixtures/yorck-list-page})
-         fixtures/hateful-8-search-url (fn [request] {:status 200 :headers {} :body fixtures/hateful-8-search-page})
-         fixtures/hateful-8-detail-url (fn [request] {:status 200 :headers {} :body fixtures/hateful-8-detail-page})
-         fixtures/carol-search-url     (fn [request] {:status 200 :headers {} :body fixtures/carol-search-page})
-         fixtures/carol-detail-url     (fn [request] {:status 200 :headers {} :body fixtures/carol-detail-page})}
+        {fixtures/yorck-list-url       (fixtures/yorck-list-ok)
+         fixtures/hateful-8-search-url (fixtures/status-ok fixtures/hateful-8-search-page)
+         fixtures/hateful-8-detail-url (fixtures/status-ok fixtures/hateful-8-detail-page)
+         fixtures/carol-search-url     (fixtures/status-ok fixtures/carol-search-page)
+         fixtures/carol-detail-url     (fixtures/status-ok fixtures/carol-detail-page)}
         (let [expected [(hiccup/html (view/movie-item fixtures/hateful-8-rated-movie))
                         (hiccup/html (view/movie-item fixtures/carol-rated-movie))]
               response (atom {})
@@ -27,8 +34,4 @@
           (Thread/sleep 500)
 
           (:status @response) => 200
-          (->> (:body @response)
-               (hickory/parse)
-               (hickory/as-hickory)
-               (selector/select (selector/child (selector/class :rated-movie)))
-               (mapv render/hickory-to-html)) => expected)))
+          (get-rated-movies-html (:body @response)) => expected)))

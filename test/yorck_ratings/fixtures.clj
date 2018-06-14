@@ -8,12 +8,18 @@
        (io/resource)
        (slurp)))
 
+(defn status-ok [body]
+  (fn [request] {:status 200 :headers {} :body body}))
+
 (def yorck-list-url "https://www.yorck.de/filme?filter_today=true")
 (def yorck-list-page (load-fixture "yorck_list.html"))
+(defn yorck-list-ok []
+  (fn [request] {:status 200 :headers {} :body yorck-list-page}))
+
 
 (def no-search-result-yorck-title "No search result")
 (def no-search-result-search-page (load-fixture "no_search_result_search_page.html"))
-(def no-search-result-search-url "https://m.imdb.com/find?q=No+search+result")
+(def no-search-result-url "https://m.imdb.com/find?q=No+search+result")
 
 (def carol-yorck-title "Carol")
 (def carol-yorck-url "https://www.yorck.de/filme/carol")
@@ -21,6 +27,7 @@
 (def carol-search-url "https://m.imdb.com/find?q=Carol")
 (def carol-detail-page (load-fixture "carol_detail_page.html"))
 (def carol-detail-url "https://m.imdb.com/title/tt2402927/")
+(def carol-imdb-title "Carol")
 (def carol-rating 7.2)
 (def carol-rating-count 89891)
 (def carol-rated-movie (rated-movie/make {:rating       7.2

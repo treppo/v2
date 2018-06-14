@@ -12,8 +12,10 @@
 
 (fact "returns rated-movies with yorck title and yorck url"
       (let [get-page-stub (make-get-page-stub [["a title" a-url]])
-            result-channel (async/chan)
-            _ (yorck/infos get-page-stub result-channel)]
+            result-channel (async/chan)]
+
+        (yorck/infos get-page-stub result-channel)
+
         (async/<!! result-channel) => [(rated-movie/make {:yorck-title "a title"
                                                           :yorck-url   a-url})]))
 
@@ -21,6 +23,7 @@
       (let [get-page-stub (make-get-page-stub [["a title" a-url] ["a sneak preview" "another url"]])
             result-channel (async/chan)
             _ (yorck/infos get-page-stub result-channel)]
+
         (async/<!! result-channel) => [(rated-movie/make {:yorck-title "a title"
                                                           :yorck-url   a-url})]))
 
@@ -31,9 +34,8 @@
     (async/<!! result-channel)))
 
 (fact "removes dimension from title"
-      (without-dimension "Pets - 2D") =>
-      [(rated-movie/make {:yorck-title "Pets"
-                          :yorck-url   a-url})]
+      (without-dimension "Pets - 2D") => [(rated-movie/make {:yorck-title "Pets"
+                                                             :yorck-url   a-url})]
 
       (without-dimension "Ice Age - Kollision voraus! 2D!") =>
       [(rated-movie/make {:yorck-title "Ice Age - Kollision voraus!"
@@ -68,8 +70,9 @@
 
 (fact "pulls titles and urls from yorck page"
       (with-fake-routes-in-isolation
-        {fixtures/yorck-list-url (fn [request] {:status 200 :headers {} :body fixtures/yorck-list-page})}
+        {fixtures/yorck-list-url (fixtures/yorck-list-ok)}
         (let [expected [[fixtures/carol-yorck-title fixtures/carol-yorck-url]
                         [fixtures/hateful-8-yorck-title fixtures/hateful-8-yorck-url]
                         ["Sneak FAF" "https://www.yorck.de/filme/sneak-faf"]]]
+
           (async/<!! (yorck/get-yorck-infos-async)) => expected)))
