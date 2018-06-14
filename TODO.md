@@ -1,5 +1,8 @@
 * add deployment step to pipeline
-* introduce proper domain objects for rating and imdb info
+* rename yorck to cinema
+* infos should be called info
+* change css for highlighting
+* use clojure idiomatic regex in yorck
 * handle connection errors gracefully
 * add logging
 * add http level caching

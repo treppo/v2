@@ -4,9 +4,6 @@
             [yorck-ratings.rated-movie :as rated-movie]
             [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop onto-chan]]))
 
-(defn- sort-by-rating [movies]
-  (reverse (sort-by rated-movie/rating movies)))
-
 (defn rated-movies [result-chan]
   (let [yorck-infos-chan (chan)
         yorck-infos-split-chan (chan)
@@ -27,5 +24,5 @@
       (if-let [movie (<! imdb-detail-chan)]
         (recur (conj movies movie))
         (do
-          (>! result-chan (sort-by-rating movies))
+          (>! result-chan (rated-movie/sorted movies))
           (close! result-chan))))))

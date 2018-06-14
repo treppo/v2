@@ -55,45 +55,45 @@
     (close! result-chan)))
 
 (defn rating [detail-page]
-  (try
-    (->> detail-page
-         (selector/select (selector/descendant
-                            (selector/id :ratings-bar)
-                            selector/first-child
-                            (selector/class :inline-block)))
-         first
-         :content
-         first
-         Double/parseDouble)
-    (catch Exception _ 0.0)))
+  (->> detail-page
+       (selector/select (selector/descendant
+                          (selector/id :ratings-bar)
+                          selector/first-child
+                          (selector/class :inline-block)))
+       first
+       :content
+       first
+       Double/parseDouble))
 
 (defn- remove-comma [a-string]
   (string/replace-first a-string "," ""))
 
 (defn rating-count [detail-page]
-  (try
-    (->> detail-page
-         (selector/select (selector/descendant
-                            (selector/id :ratings-bar)
-                            selector/first-child
-                            (selector/class :inline-block)
-                            (selector/class :text-muted)))
-         first
-         :content
-         last
-         remove-comma
-         Integer/parseInt)
-    (catch Exception _ 0)))
+  (->> detail-page
+       (selector/select (selector/descendant
+                          (selector/id :ratings-bar)
+                          selector/first-child
+                          (selector/class :inline-block)
+                          (selector/class :text-muted)))
+       first
+       :content
+       last
+       remove-comma
+       Integer/parseInt))
 
 (defn get-detail-page [url]
   (go
     (let [page (<! (http/get-async url))]
-      [(rating page) (rating-count page)])))
+      (try
+        [(rating page) (rating-count page)]
+        (catch Exception e [])))))
 
 (defn detail [get-page-fn rated-movie result-chan]
   (go
     (if (rated-movie/has-imdb-info? rated-movie)
       (let [detail-infos (<! (get-page-fn (rated-movie/imdb-url rated-movie)))]
-        (>! result-chan (rated-movie/with-imdb-rating rated-movie detail-infos)))
+        (if (not-empty detail-infos)
+          (>! result-chan (rated-movie/with-imdb-rating rated-movie detail-infos))
+          (>! result-chan rated-movie)))
       (>! result-chan rated-movie))
     (close! result-chan)))

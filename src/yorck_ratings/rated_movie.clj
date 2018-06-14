@@ -12,6 +12,9 @@
 (defn has-imdb-rating? [rated-movie]
   (:imdb-rating rated-movie))
 
+(defn no-imdb-rating? [rated-movie]
+  (nil? (:imdb-rating rated-movie)))
+
 (defn from-yorck-info [[title url]]
   (make {:yorck-info [title url]}))
 
@@ -29,11 +32,16 @@
   (let [[rating count] (:imdb-rating rated-movie)]
     count))
 
-(defn rating-above [rated-movie threshold]
-  (> (rating rated-movie) threshold))
+(def rating-threshold 7)
+
+(defn rating-above-threshold [rated-movie]
+  (>= (rating rated-movie) rating-threshold))
+
+(defn rating-below-threshold [rated-movie]
+  (< (rating rated-movie) rating-threshold))
 
 (defn is-considerable-movie? [rated-movie]
-  (and (has-imdb-rating? rated-movie) (rating-above rated-movie 7)))
+  (and (has-imdb-rating? rated-movie) (rating-above-threshold rated-movie)))
 
 (defn yorck-title [rated-movie]
   (let [[title url] (:yorck-info rated-movie)]
@@ -50,3 +58,14 @@
 (defn imdb-url [rated-movie]
   (let [[title url] (:imdb-info rated-movie)]
     url))
+
+(defn by-rating [a b]
+  (cond
+    (and (no-imdb-rating? a) (no-imdb-rating? b)) 0
+    (and (no-imdb-rating? a) (rating-above-threshold b)) -1
+    (and (no-imdb-rating? a) (rating-below-threshold b)) 1
+    (and (rating-below-threshold a) (no-imdb-rating? b)) -1
+    :else (compare (rating a) (rating b))))
+
+(defn sorted [rated-movies]
+  (reverse (sort by-rating rated-movies)))

@@ -21,6 +21,8 @@
 (def no-search-result-search-page (load-fixture "no_search_result_search_page.html"))
 (def no-search-result-url "https://m.imdb.com/find?q=No+search+result")
 
+(def no-rating-detail-page (load-fixture "no_rating_detail_page.html"))
+
 (def carol-yorck-title "Carol")
 (def carol-yorck-url "https://www.yorck.de/filme/carol")
 (def carol-search-page (load-fixture "carol_search_page.html"))

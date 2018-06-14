@@ -52,7 +52,7 @@
 
         (async/<!! (imdb/get-search-page fixtures/no-search-result-yorck-title)) => []))
 
-(defn- get-detail-page-stub [_]
+(defn- get-detail-page [_]
   (let [result-chan (async/chan)]
     (async/put! result-chan [rating rating-count])
     result-chan))
@@ -60,23 +60,40 @@
 (fact "adds imdb rating and rating count"
       (let [result-chan (async/chan)]
 
-        (imdb/detail get-detail-page-stub a-rated-movie-with-search-infos result-chan)
+        (imdb/detail get-detail-page a-rated-movie-with-search-infos result-chan)
 
         (async/<!! result-chan) => a-rated-movie-with-detail-infos))
 
-(defn- never-called-stub [_]
+(defn- never-called [_]
   (throw (UnsupportedOperationException. "get-detail-stub should not be called here")))
 
 (fact "doesn't add detail info if it doesn't have search info"
       (let [result-chan (async/chan)]
 
-        (imdb/detail never-called-stub default-rated-movie result-chan) =not=> (throws UnsupportedOperationException)
+        (imdb/detail never-called default-rated-movie result-chan) =not=> (throws UnsupportedOperationException)
 
         (async/<!! result-chan) => default-rated-movie))
+
+(defn- get-detail-page-without-rating [_]
+  (let [result-chan (async/chan)]
+    (async/put! result-chan [])
+    result-chan))
+
+(fact "doesn't add rating if the movie doesn't have any"
+      (let [result-chan (async/chan)]
+
+        (imdb/detail get-detail-page-without-rating a-rated-movie-with-search-infos result-chan)
+
+        (async/<!! result-chan) => a-rated-movie-with-search-infos))
 
 (fact "pulls rating and rating count from imdb detail page"
       (with-fake-routes-in-isolation
         {url (fixtures/status-ok fixtures/carol-detail-page)}
-        (let [expected [rating rating-count]]
 
-          (async/<!! (imdb/get-detail-page url)) => expected)))
+        (async/<!! (imdb/get-detail-page url)) => [rating rating-count]))
+
+(fact "return no rating if rating can't be found"
+      (with-fake-routes-in-isolation
+        {url (fixtures/status-ok fixtures/no-rating-detail-page)}
+
+        (async/<!! (imdb/get-detail-page url)) => []))
