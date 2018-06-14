@@ -56,8 +56,7 @@
       (if (empty? search-infos)
         (>! result-chan rated-movie)
         (>! result-chan (with-search-infos rated-movie search-infos))))
-    (close! result-chan))
-  result-chan)
+    (close! result-chan)))
 
 (defn rating [detail-page]
   (try
@@ -105,5 +104,4 @@
       (let [detail-infos (<! (get-page-fn (:imdb-url rated-movie)))]
        (>! result-chan (with-detail-infos rated-movie detail-infos)))
       (>! result-chan rated-movie))
-    (close! result-chan))
-  result-chan)
+    (close! result-chan)))
