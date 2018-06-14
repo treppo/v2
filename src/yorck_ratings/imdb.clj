@@ -35,10 +35,6 @@
         (str base-url))
     (catch Exception _ nil)))
 
-(defn- with-search-infos [rated-movie [title url]]
-  (merge rated-movie {:imdb-title title
-                      :imdb-url   url}))
-
 (defn get-search-page [yorck-title]
   (go
     (let [enc-title (URLEncoder/encode yorck-title "UTF-8")
@@ -52,10 +48,10 @@
 
 (defn search [get-infos-fn rated-movie result-chan]
   (go
-    (let [search-infos (<! (get-infos-fn (:yorck-title rated-movie)))]
+    (let [search-infos (<! (get-infos-fn (rated-movie/yorck-title rated-movie)))]
       (if (empty? search-infos)
         (>! result-chan rated-movie)
-        (>! result-chan (with-search-infos rated-movie search-infos))))
+        (>! result-chan (rated-movie/with-imdb-info rated-movie search-infos))))
     (close! result-chan)))
 
 (defn rating [detail-page]
@@ -89,10 +85,6 @@
          Integer/parseInt)
     (catch Exception _ 0)))
 
-(defn- with-detail-infos [rated-movie [rating rating-count]]
-  (merge rated-movie {:rating       rating
-                      :rating-count rating-count}))
-
 (defn get-detail-page [url]
   (go
     (let [page (<! (http/get-async url))]
@@ -100,8 +92,8 @@
 
 (defn detail [get-page-fn rated-movie result-chan]
   (go
-    (if (rated-movie/has-imdb-infos? rated-movie)
-      (let [detail-infos (<! (get-page-fn (:imdb-url rated-movie)))]
-       (>! result-chan (with-detail-infos rated-movie detail-infos)))
+    (if (rated-movie/has-imdb-info? rated-movie)
+      (let [detail-infos (<! (get-page-fn (rated-movie/imdb-url rated-movie)))]
+        (>! result-chan (rated-movie/with-imdb-rating rated-movie detail-infos)))
       (>! result-chan rated-movie))
     (close! result-chan)))

@@ -1,10 +1,11 @@
 (ns yorck-ratings.core
   (:require [yorck-ratings.yorck :as yorck]
             [yorck-ratings.imdb :as imdb]
+            [yorck-ratings.rated-movie :as rated-movie]
             [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop onto-chan]]))
 
 (defn- sort-by-rating [movies]
-  (reverse (sort-by :rating movies)))
+  (reverse (sort-by rated-movie/rating movies)))
 
 (defn rated-movies [result-chan]
   (let [yorck-infos-chan (chan)

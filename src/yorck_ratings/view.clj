@@ -1,13 +1,26 @@
 (ns yorck-ratings.view
-  (:use [hiccup.page]))
+  (:use [hiccup.page])
+  (:require [yorck-ratings.rated-movie :as rated-movie]))
 
-(defn movie-item [movie]
-  (let [{:keys [rating rating-count imdb-title imdb-url yorck-title yorck-url]} movie]
-    [:li {:class (if (< (:rating movie) 7) "rated-movie" "rated-movie highlighted")}
-     (str rating " (" rating-count ") • ")
-     [:a {:href imdb-url} imdb-title]
-     " • "
-     [:a {:href yorck-url} yorck-title]]))
+(defn- rating [rated-movie]
+  (if (rated-movie/has-imdb-rating? rated-movie)
+    [:span (str (rated-movie/rating rated-movie) " (" (rated-movie/rating-count rated-movie) ")")]
+    "∅"))
+
+(defn- imdb-info [rated-movie]
+  (if (rated-movie/has-imdb-info? rated-movie)
+    [:a {:href (rated-movie/imdb-url rated-movie)} (rated-movie/imdb-title rated-movie)]
+    "Not found on IMDB"))
+
+(def separator " • ")
+
+(defn movie-item [rated-movie]
+  [:li {:class (if (rated-movie/is-considerable-movie? rated-movie) "considerable rated-movie" "rated-movie")}
+   (rating rated-movie)
+   separator
+   (imdb-info rated-movie)
+   separator
+   [:a {:href (rated-movie/yorck-url rated-movie)} (rated-movie/yorck-title rated-movie)]])
 
 (defn markup [movies]
   (html5
@@ -36,7 +49,7 @@
                 margin-top: 0;
               }
               a { color: black; }
-              .highlighted {
+              .considerable {
                 background-color: yellow;
                 margin-left: -.4rem;
                 margin-right: -.4rem;
@@ -47,4 +60,5 @@
      [:h1 "IMDB rated Yorck movies"]
      [:ol
       (for [movie movies]
-        (movie-item movie))]]))
+        (do
+          (movie-item movie)))]]))

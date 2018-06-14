@@ -7,12 +7,17 @@
             [yorck-ratings.rated-movie :as rated-movie]))
 
 (def title fixtures/carol-imdb-title)
-(def default-rated-movie (rated-movie/make {}))
-(def a-rated-movie-with-search-infos (rated-movie/make {:imdb-url fixtures/carol-detail-url :imdb-title title}))
-
 (def url fixtures/carol-detail-url)
 (def rating fixtures/carol-rating)
 (def rating-count fixtures/carol-rating-count)
+
+(def default-rated-movie (rated-movie/from-yorck-info [fixtures/carol-yorck-title fixtures/carol-yorck-url]))
+
+(def a-rated-movie-with-search-infos
+  (rated-movie/with-imdb-info default-rated-movie [title url]))
+
+(def a-rated-movie-with-detail-infos
+  (rated-movie/with-imdb-rating a-rated-movie-with-search-infos [rating rating-count]))
 
 (defn- make-get-search-infos-stub [infos]
   (fn [_]
@@ -25,15 +30,14 @@
 
         (imdb/search (make-get-search-infos-stub [title url]) default-rated-movie result-chan)
 
-        (async/<!! result-chan) => (rated-movie/make {:imdb-title title
-                                                      :imdb-url   url})))
+        (async/<!! result-chan) => a-rated-movie-with-search-infos))
 
 (fact "does not add anything if the movie can't be found on imdb"
       (let [result-chan (async/chan)]
 
         (imdb/search (make-get-search-infos-stub []) default-rated-movie result-chan)
 
-        (async/<!! result-chan) => (rated-movie/make {})))
+        (async/<!! result-chan) => default-rated-movie))
 
 (fact "pulls titles and urls from imdb search page"
       (with-fake-routes-in-isolation
@@ -58,10 +62,7 @@
 
         (imdb/detail get-detail-page-stub a-rated-movie-with-search-infos result-chan)
 
-        (async/<!! result-chan) => (rated-movie/make {:rating       rating
-                                                      :rating-count rating-count
-                                                      :imdb-url     url
-                                                      :imdb-title   title})))
+        (async/<!! result-chan) => a-rated-movie-with-detail-infos))
 
 (defn- never-called-stub [_]
   (throw (UnsupportedOperationException. "get-detail-stub should not be called here")))

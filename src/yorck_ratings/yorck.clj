@@ -47,6 +47,5 @@
                            (remove is-sneak-preview)
                            (mapv remove-dimension)
                            (mapv rotate-article)
-                           (mapv (fn [[title url]] (rated-movie/make {:yorck-title title
-                                                                      :yorck-url   url}))))))
+                           (mapv rated-movie/from-yorck-info))))
     (close! result-chan)))

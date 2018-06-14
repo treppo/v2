@@ -1,17 +1,52 @@
 (ns yorck-ratings.rated-movie)
 
-(defrecord RatedMovie [rating rating-count imdb-title imdb-url yorck-title yorck-url])
+(defn make [{:keys [yorck-info imdb-info imdb-rating]}]
+  (assert (not (nil? yorck-info)) "At least Yorck info must be provided")
+  {:yorck-info  yorck-info
+   :imdb-info   imdb-info
+   :imdb-rating imdb-rating})
 
-(def fallback-url "#")
+(defn has-imdb-info? [rated-movie]
+  (:imdb-info rated-movie))
 
-(defn make
-  [{:keys [yorck-title rating rating-count imdb-title imdb-url yorck-url]
-    :or   {rating       0
-           rating-count 0
-           imdb-title   "No IMDB title"
-           imdb-url     fallback-url
-           yorck-url    fallback-url}}]
-  (RatedMovie. rating rating-count imdb-title imdb-url yorck-title yorck-url))
+(defn has-imdb-rating? [rated-movie]
+  (:imdb-rating rated-movie))
 
-(defn has-imdb-infos? [rated-movie]
-  (not= fallback-url (:imdb-url rated-movie)))
+(defn from-yorck-info [[title url]]
+  (make {:yorck-info [title url]}))
+
+(defn with-imdb-info [rated-movie [title url]]
+  (merge rated-movie {:imdb-info [title url]}))
+
+(defn with-imdb-rating [rated-movie [rating rating-count]]
+  (merge rated-movie {:imdb-rating [rating rating-count]}))
+
+(defn rating [rated-movie]
+  (let [[rating count] (:imdb-rating rated-movie)]
+    rating))
+
+(defn rating-count [rated-movie]
+  (let [[rating count] (:imdb-rating rated-movie)]
+    count))
+
+(defn rating-above [rated-movie threshold]
+  (> (rating rated-movie) threshold))
+
+(defn is-considerable-movie? [rated-movie]
+  (and (has-imdb-rating? rated-movie) (rating-above rated-movie 7)))
+
+(defn yorck-title [rated-movie]
+  (let [[title url] (:yorck-info rated-movie)]
+    title))
+
+(defn yorck-url [rated-movie]
+  (let [[title url] (:yorck-info rated-movie)]
+    url))
+
+(defn imdb-title [rated-movie]
+  (let [[title url] (:imdb-info rated-movie)]
+    title))
+
+(defn imdb-url [rated-movie]
+  (let [[title url] (:imdb-info rated-movie)]
+    url))
