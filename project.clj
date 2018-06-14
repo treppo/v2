@@ -14,13 +14,12 @@
   :main yorck-ratings.web
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
-             :dev     {:resource-paths ["config/dev"]
-                       :dependencies   [[midje "1.9.1"]
+             :dev     {:dependencies   [[midje "1.9.1"]
                                         [clj-http-fake "1.0.3"]
                                         [ring/ring-mock "0.3.2"]]
                        :plugins        [[lein-midje "3.2.1"]
                                         [lein-jlink "0.2.0"]]
                        :jlink-modules  ["java.base" "java.sql" "java.naming"]}
-             :midje   {:resource-paths ["test/resources" "config/test"]}}
+             :midje   {:resource-paths ["test/resources"]}}
   :min-lein-version "2.8.0"
   :uberjar-name "yorck-ratings-standalone.jar")
