@@ -6,7 +6,7 @@
 (defn- sort-by-rating [movies]
   (reverse (sort-by :rating movies)))
 
-(defn rated-movies [callback]
+(defn rated-movies [result-chan]
   (let [yorck-infos-chan (chan)
         yorck-infos-split-chan (chan)
         imdb-search-chan (chan)
@@ -25,4 +25,6 @@
     (go-loop [movies []]
       (if-let [movie (<! imdb-detail-chan)]
         (recur (conj movies movie))
-        (callback (sort-by-rating movies))))))
+        (do
+          (>! result-chan (sort-by-rating movies))
+          (close! result-chan))))))

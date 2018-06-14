@@ -1,6 +1,7 @@
 (ns yorck-ratings.web
   (:require [yorck-ratings.core :as core]
             [yorck-ratings.view :as view]
+            [clojure.core.async :refer [go <! chan close!]]
             [ring.adapter.jetty :refer [run-jetty]])
   (:gen-class))
 
@@ -16,9 +17,10 @@
 
 (defn async-handler [req success-fn error-fn]
   (if (= "/" (:uri req))
-    (core/rated-movies
-      (fn [movies]
-        (success-fn (found (view/markup movies)))))
+    (go
+      (let [result-chan (chan)]
+       (core/rated-movies result-chan)
+       (success-fn (found (view/markup (<! result-chan))))))
     (not-found)))
 
 (defn -main [& args]
