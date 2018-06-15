@@ -1,17 +1,17 @@
 before_script:
-  - apt-get update -y
-  - apt-get install default-jre -y
-  - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
-  - chmod a+x lein
-  - export LEIN_ROOT=1
-  - PATH=$PATH:.
-  - lein deps
-  - curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+    - apt-get update -y
 
 test:
   script:
+    - apt-get install default-jre -y
+    - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+    - chmod a+x lein
+    - export LEIN_ROOT=1
+    - PATH=$PATH:.
+    - lein deps
     - lein midje
 
 deploy:
   script:
+    - curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
     - ./deploy.sh

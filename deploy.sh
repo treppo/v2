@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-heroku container:login
-heroku container:push web
+echo $HEROKU_API_KEY | docker login --username _ --password-stdin registry.heroku.com
+docker tag application registry.heroku.com/yorck-ratings/web
+docker push registry.heroku.com/yorck-ratings/web
 heroku container:release web --app yorck-ratings
