@@ -1,11 +1,4 @@
-FROM anapsix/alpine-java:9_jdk AS base
-
-RUN apk add --update --no-cache wget ca-certificates bash && \
-    wget -q "https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein" \
-         -O /usr/local/bin/lein && \
-    chmod 0755 /usr/local/bin/lein && \
-    apk del wget ca-certificates && \
-    rm -rf /tmp/* /var/cache/apk/*
+FROM treppo/alpine-jdk9-leiningen AS build
 
 COPY . /opt/application
 WORKDIR /opt/application
@@ -15,6 +8,7 @@ RUN lein do midje, jlink assemble
 FROM frolvlad/alpine-glibc
 
 RUN apk add --no-cache libstdc++
-COPY --from=base /opt/application/target/default/jlink /opt/yorck-ratings
+COPY --from=build /opt/application/target/default/jlink /opt/yorck-ratings
+WORKDIR /opt/yorck-ratings
 ENTRYPOINT ["/bin/sh", "-c"]
-CMD /opt/yorck-ratings/bin/yorck-ratings
+CMD bin/yorck-ratings

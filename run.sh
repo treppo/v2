@@ -2,4 +2,4 @@
 
 set -eux
 
-docker run --rm --publish 8000:8000 --detach application
+docker run --rm --publish 8000:8000 application
