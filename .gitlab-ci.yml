@@ -6,7 +6,12 @@ before_script:
   - export LEIN_ROOT=1
   - PATH=$PATH:.
   - lein deps
+  - curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
 
 test:
   script:
     - lein midje
+
+deploy:
+  script:
+    - ./deploy.sh
