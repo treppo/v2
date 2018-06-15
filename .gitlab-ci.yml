@@ -1,3 +1,10 @@
+image: docker:latest
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay
+
 before_script:
     - apt-get update -y
 
@@ -10,6 +17,10 @@ test:
     - PATH=$PATH:.
     - lein deps
     - lein midje
+
+build:
+  script:
+    - ./build.sh
 
 deploy:
   script:
