@@ -12,9 +12,9 @@ stages:
 build:
   stage: build
   script:
-    - ./build.sh
+    - ./bin/build.sh
 
 release:
   stage: release
   script:
-    - ./release.sh
+    - ./bin/brelease.sh
