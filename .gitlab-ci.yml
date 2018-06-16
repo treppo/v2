@@ -6,21 +6,8 @@ variables:
   DOCKER_DRIVER: overlay
 
 stages:
-  - test
   - build
   - release
-
-test:
-  stage: test
-  script:
-    - apk update
-    - apk install openjdk8-jre-base
-    - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
-    - chmod a+x lein
-    - export LEIN_ROOT=1
-    - PATH=$PATH:.
-    - lein deps
-    - lein midje
 
 build:
   stage: build
