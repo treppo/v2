@@ -5,12 +5,16 @@ services:
 variables:
   DOCKER_DRIVER: overlay
 
-before_script:
-    - apt-get update -y
+stages:
+  - test
+  - build
+  - release
 
 test:
+  stage: test
   script:
-    - apt-get install default-jre -y
+    - apk update
+    - apk install openjdk8-jre-base
     - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
     - chmod a+x lein
     - export LEIN_ROOT=1
@@ -19,10 +23,13 @@ test:
     - lein midje
 
 build:
+  stage: build
   script:
-    - ./build.sh
+    - docker build --tag registry.heroku.com/yorck-ratings/web --rm .
+    - echo $HEROKU_API_KEY | docker login --username _ --password-stdin registry.heroku.com
+    - docker push registry.heroku.com/yorck-ratings/web
 
-deploy:
+release:
+  stage: release
   script:
-    - curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
-    - ./deploy.sh
+    - docker run --rm -e HEROKU_API_KEY=$HEROKU_API_KEY dickeyxxx/heroku-cli:v7.0.98 heroku container:release web --app yorck-ratings
