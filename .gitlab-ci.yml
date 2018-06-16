@@ -17,4 +17,4 @@ build:
 release:
   stage: release
   script:
-    - ./bin/brelease.sh
+    - ./bin/release.sh
