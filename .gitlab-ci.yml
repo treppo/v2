@@ -12,11 +12,9 @@ stages:
 build:
   stage: build
   script:
-    - docker build --tag registry.heroku.com/yorck-ratings/web --rm .
-    - echo $HEROKU_API_KEY | docker login --username _ --password-stdin registry.heroku.com
-    - docker push registry.heroku.com/yorck-ratings/web
+    - ./build.sh
 
 release:
   stage: release
   script:
-    - docker run --rm -e HEROKU_API_KEY=$HEROKU_API_KEY dickeyxxx/heroku-cli:v7.0.98 heroku container:release web --app yorck-ratings
+    - ./release.sh
