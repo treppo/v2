@@ -6,7 +6,7 @@
             [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop]])
   (:import (java.util.regex Pattern)))
 
-(def yorck-base-url "https://www.yorck.de")
+(def ^:private yorck-base-url "https://www.yorck.de")
 
 (defn- yorck-titles [yorck-page]
   (->> yorck-page

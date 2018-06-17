@@ -3,24 +3,27 @@
             [hickory.core :as hickory]
             [clojure.core.async :refer [go chan >! close!]]))
 
-(def DEFAULT-TIMEOUT 10000)
+(def ^:private timeout 10000)
 
 (defn- error-message [url cause]
   (println (str "Error fetching URL \"" url "\": " cause)))
+
+(defn- print-stack-trace [^Throwable exception]
+                   (.printStackTrace exception))
 
 (defn get-async [url]
   (let [out (chan)]
     (client/get url
                 {:async?         true
-                 :socket-timeout DEFAULT-TIMEOUT
-                 :conn-timeout   DEFAULT-TIMEOUT}
+                 :socket-timeout timeout
+                 :conn-timeout   timeout}
                 (fn [{:keys [status body]}]
                   (go
                     (if (>= status 400)
                       (error-message url (str "response status code was " status))
                       (>! out (hickory/as-hickory (hickory/parse body))))
                     (close! out)))
-                (fn [^Throwable exception]
+                (fn [exception]
                   (error-message url (str "exception occurred"))
-                  (.printStackTrace exception)))
+                  (print-stack-trace exception)))
     out))

@@ -5,12 +5,12 @@
             [ring.adapter.jetty :refer [run-jetty]])
   (:gen-class))
 
-(defn not-found []
+(defn- not-found []
   {:status  404
    :headers {"Content-Type" "text/plain"}
    :body    "404 Not Found"})
 
-(defn found [body]
+(defn- found [body]
   {:status  200
    :headers {"Content-Type" "text/html; charset=utf-8"}
    :body    body})

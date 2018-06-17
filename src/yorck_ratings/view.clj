@@ -12,7 +12,7 @@
     [:a {:href (rated-movie/imdb-url rated-movie)} (rated-movie/imdb-title rated-movie)]
     "Not found on IMDB"))
 
-(def separator " • ")
+(def ^:private separator " • ")
 
 (defn movie-item [rated-movie]
   (let [class (cond

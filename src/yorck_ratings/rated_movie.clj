@@ -51,8 +51,8 @@
   (not (has-imdb-rating? rated-movie)))
 
 
-(def rating-threshold 7)
-(def count-threshold 1000)
+(def ^:private rating-threshold 7)
+(def ^:private count-threshold 1000)
 
 (defn- count-above-threshold [rated-movie]
   (>= (rating-count rated-movie) count-threshold))

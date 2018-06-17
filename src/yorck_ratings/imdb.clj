@@ -6,7 +6,7 @@
             [yorck-ratings.rated-movie :as rated-movie])
   (:import (java.net URLEncoder)))
 
-(def base-url "https://m.imdb.com")
+(def ^:private base-url "https://m.imdb.com")
 
 (defn- parse-title [search-page]
   (try
@@ -52,23 +52,22 @@
 
 (defn search [get-infos-fn rated-movie result-chan]
   (go
-    (let [search-infos (<! (get-infos-fn (rated-movie/yorck-title rated-movie)))]
-      (if (empty? search-infos)
-        (>! result-chan rated-movie)
-        (>! result-chan (rated-movie/with-imdb-info rated-movie search-infos))))
+    (if-let [search-infos (not-empty (<! (get-infos-fn (rated-movie/yorck-title rated-movie))))]
+      (>! result-chan (rated-movie/with-imdb-info rated-movie search-infos))
+      (>! result-chan rated-movie))
     (close! result-chan)))
 
 (defn rating [detail-page]
   (try
     (->> detail-page
-        (selector/select (selector/descendant
-                           (selector/id :ratings-bar)
-                           selector/first-child
-                           (selector/class :inline-block)))
-        first
-        :content
-        first
-        Double/parseDouble)
+         (selector/select (selector/descendant
+                            (selector/id :ratings-bar)
+                            selector/first-child
+                            (selector/class :inline-block)))
+         first
+         :content
+         first
+         Double/parseDouble)
     (catch Exception e nil)))
 
 (defn- remove-comma [a-string]
@@ -77,16 +76,16 @@
 (defn rating-count [detail-page]
   (try
     (->> detail-page
-        (selector/select (selector/descendant
-                           (selector/id :ratings-bar)
-                           selector/first-child
-                           (selector/class :inline-block)
-                           (selector/class :text-muted)))
-        first
-        :content
-        last
-        remove-comma
-        Integer/parseInt)
+         (selector/select (selector/descendant
+                            (selector/id :ratings-bar)
+                            selector/first-child
+                            (selector/class :inline-block)
+                            (selector/class :text-muted)))
+         first
+         :content
+         last
+         remove-comma
+         Integer/parseInt)
     (catch Exception e nil)))
 
 (defn get-detail-page [url]
@@ -101,9 +100,8 @@
 (defn detail [get-page-fn rated-movie result-chan]
   (go
     (if (rated-movie/has-imdb-info? rated-movie)
-      (let [detail-infos (<! (get-page-fn (rated-movie/imdb-url rated-movie)))]
-        (if (not-empty detail-infos)
-          (>! result-chan (rated-movie/with-imdb-rating rated-movie detail-infos))
-          (>! result-chan rated-movie)))
+      (if-let [detail-infos (not-empty (<! (get-page-fn (rated-movie/imdb-url rated-movie))))]
+        (>! result-chan (rated-movie/with-imdb-rating rated-movie detail-infos))
+        (>! result-chan rated-movie))
       (>! result-chan rated-movie))
     (close! result-chan)))
