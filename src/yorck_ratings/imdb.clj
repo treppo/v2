@@ -11,13 +11,13 @@
 (defn- parse-title [search-page]
   (try
     (->> search-page
-        (selector/select (selector/descendant
-                           (selector/class :subpage)
-                           (selector/class :h3)))
-        first
-        :content
-        first
-        string/trim)
+         (selector/select (selector/descendant
+                            (selector/class :subpage)
+                            (selector/class :h3)))
+         first
+         :content
+         first
+         string/trim)
     (catch Exception _ nil)))
 
 (defn- remove-parameters [path]
@@ -26,20 +26,24 @@
 (defn- parse-url [search-page]
   (try
     (->> search-page
-        (selector/select (selector/descendant
-                           (selector/class :subpage)))
-        (mapv :attrs)
-        (mapv :href)
-        first
-        remove-parameters
-        (str base-url))
+         (selector/select (selector/descendant
+                            (selector/class :subpage)))
+         (mapv :attrs)
+         (mapv :href)
+         first
+         remove-parameters
+         (str base-url))
     (catch Exception _ nil)))
+
+(defn- url-encode [^String s]
+  (URLEncoder/encode s "UTF-8"))
+
+(defn- search-url [title]
+  (str base-url "/find?q=" (url-encode title)))
 
 (defn get-search-page [yorck-title]
   (go
-    (let [enc-title (URLEncoder/encode yorck-title "UTF-8")
-          search-url (str base-url "/find?q=" enc-title)
-          page (<! (http/get-async search-url))
+    (let [page (<! (http/get-async (search-url yorck-title)))
           title (parse-title page)
           url (parse-url page)]
       (if (and title url)
@@ -55,38 +59,44 @@
     (close! result-chan)))
 
 (defn rating [detail-page]
-  (->> detail-page
-       (selector/select (selector/descendant
-                          (selector/id :ratings-bar)
-                          selector/first-child
-                          (selector/class :inline-block)))
-       first
-       :content
-       first
-       Double/parseDouble))
+  (try
+    (->> detail-page
+        (selector/select (selector/descendant
+                           (selector/id :ratings-bar)
+                           selector/first-child
+                           (selector/class :inline-block)))
+        first
+        :content
+        first
+        Double/parseDouble)
+    (catch Exception e nil)))
 
 (defn- remove-comma [a-string]
   (string/replace-first a-string "," ""))
 
 (defn rating-count [detail-page]
-  (->> detail-page
-       (selector/select (selector/descendant
-                          (selector/id :ratings-bar)
-                          selector/first-child
-                          (selector/class :inline-block)
-                          (selector/class :text-muted)))
-       first
-       :content
-       last
-       remove-comma
-       Integer/parseInt))
+  (try
+    (->> detail-page
+        (selector/select (selector/descendant
+                           (selector/id :ratings-bar)
+                           selector/first-child
+                           (selector/class :inline-block)
+                           (selector/class :text-muted)))
+        first
+        :content
+        last
+        remove-comma
+        Integer/parseInt)
+    (catch Exception e nil)))
 
 (defn get-detail-page [url]
   (go
-    (let [page (<! (http/get-async url))]
-      (try
-        [(rating page) (rating-count page)]
-        (catch Exception e [])))))
+    (let [page (<! (http/get-async url))
+          rating (rating page)
+          count (rating-count page)]
+      (if (and rating count)
+        [rating count]
+        []))))
 
 (defn detail [get-page-fn rated-movie result-chan]
   (go

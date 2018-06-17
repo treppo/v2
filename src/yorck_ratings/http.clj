@@ -20,7 +20,7 @@
                       (error-message url (str "response status code was " status))
                       (>! out (hickory/as-hickory (hickory/parse body))))
                     (close! out)))
-                (fn [exception]
+                (fn [^Throwable exception]
                   (error-message url (str "exception occurred"))
                   (.printStackTrace exception)))
     out))
