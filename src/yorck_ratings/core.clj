@@ -13,13 +13,16 @@
 
     (yorck/infos yorck/get-yorck-infos-async yorck-infos-chan)
 
+    ; TODO write macro to map items to channel
     (go
       (let [yorck-infos (<! yorck-infos-chan)]
         (onto-chan yorck-infos-split-chan yorck-infos)))
 
     (pipeline-async concurrency imdb-search-chan (partial imdb/search imdb/get-search-page) yorck-infos-split-chan)
+    ; TODO short-circuit if no imdb-info exists
     (pipeline-async concurrency imdb-detail-chan (partial imdb/detail imdb/get-detail-page) imdb-search-chan)
 
+    ; TODO macro for collecting channel items
     (go-loop [movies []]
       (if-let [movie (<! imdb-detail-chan)]
         (recur (conj movies movie))
