@@ -42,26 +42,19 @@
   (str base-url "/find?q=" (url-encode title)))
 
 (defn get-search-page [yorck-title]
-  (go
-    (let [page (<! (http/get-async (search-url yorck-title)))
-          title (parse-title page)
-          url (parse-url page)]
-      (if (and title url)
-        [title url]
-        []))))
+  (let [page (http/get-html (search-url yorck-title))
+        title (parse-title page)
+        url (parse-url page)]
+    (if (and title url)
+      [title url]
+      [])))
 
-(defn- pipeline-skip-when-empty [to merge-fn rated-movie from]
-  (go
-    (if-let [info (not-empty (<! from))]
-      (>! to (merge-fn rated-movie info))
-      (>! to rated-movie))
-    (close! to)))
+(defn search [get-info-fn rated-movie]
+  (if-let [info (not-empty (get-info-fn (rated-movie/yorck-title rated-movie)))]
+    (rated-movie/with-imdb-info rated-movie info)
+    rated-movie))
 
-(defn search [get-infos-fn rated-movie result-chan]
-  (let [info-channel (get-infos-fn (rated-movie/yorck-title rated-movie))]
-    (pipeline-skip-when-empty result-chan rated-movie/with-imdb-info rated-movie info-channel)))
-
-(defn rating [detail-page]
+(defn- rating [detail-page]
   (try
     (->> detail-page
          (selector/select (selector/descendant
@@ -77,7 +70,7 @@
 (defn- remove-comma [a-string]
   (string/replace-first a-string "," ""))
 
-(defn rating-count [detail-page]
+(defn- rating-count [detail-page]
   (try
     (->> detail-page
          (selector/select (selector/descendant
@@ -93,16 +86,16 @@
     (catch Exception e nil)))
 
 (defn get-detail-page [url]
-  (go
-    (let [page (<! (http/get-async url))
-          rating (rating page)
-          count (rating-count page)]
-      (if (and rating count)
-        [rating count]
-        []))))
+  (let [page (http/get-html url)
+        rating (rating page)
+        count (rating-count page)]
+    (if (and rating count)
+      [rating count]
+      [])))
 
-(def continue? rated-movie/has-imdb-info?)
-
-(defn detail [get-page-fn rated-movie result-chan]
-  (let [info-channel (get-page-fn (rated-movie/imdb-url rated-movie))]
-    (pipeline-skip-when-empty result-chan rated-movie/with-imdb-rating rated-movie info-channel)))
+(defn detail [get-info-fn rated-movie]
+  (if (rated-movie/has-imdb-info? rated-movie)
+    (if-let [info (not-empty (get-info-fn (rated-movie/imdb-url rated-movie)))]
+      (rated-movie/with-imdb-rating rated-movie info)
+      rated-movie)
+    rated-movie))
