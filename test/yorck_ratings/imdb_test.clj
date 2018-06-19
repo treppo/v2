@@ -64,16 +64,6 @@
 
         (async/<!! result-chan) => a-rated-movie-with-detail-infos))
 
-(defn- never-called [_]
-  (throw (UnsupportedOperationException. "get-detail-stub should not be called here")))
-
-(fact "doesn't add detail info if it doesn't have search info"
-      (let [result-chan (async/chan)]
-
-        (imdb/detail never-called default-rated-movie result-chan) =not=> (throws UnsupportedOperationException)
-
-        (async/<!! result-chan) => default-rated-movie))
-
 (defn- get-detail-page-without-rating [_]
   (let [result-chan (async/chan)]
     (async/put! result-chan [])

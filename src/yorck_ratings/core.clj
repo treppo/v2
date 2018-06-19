@@ -4,6 +4,28 @@
             [yorck-ratings.rated-movie :as rated-movie]
             [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop onto-chan]]))
 
+(defn- split [to from]
+  (go
+    (let [items (<! from)]
+      (onto-chan to items))))
+
+(defn- join [to f from]
+  (go-loop [collection []]
+    (if-let [x (<! from)]
+      (recur (conj collection x))
+      (do
+        (>! to (f collection))
+        (close! to)))))
+
+(defn skip [condition f]
+  (fn [item out]
+    (go
+      (if (condition item)
+        (f item out)
+        (do
+          (>! out item)
+          (close! out))))))
+
 (defn rated-movies [result-chan]
   (let [yorck-infos-chan (chan)
         yorck-infos-split-chan (chan)
@@ -13,19 +35,7 @@
 
     (yorck/infos yorck/get-yorck-infos-async yorck-infos-chan)
 
-    ; TODO write macro to map items to channel
-    (go
-      (let [yorck-infos (<! yorck-infos-chan)]
-        (onto-chan yorck-infos-split-chan yorck-infos)))
-
+    (split yorck-infos-split-chan yorck-infos-chan)
     (pipeline-async concurrency imdb-search-chan (partial imdb/search imdb/get-search-page) yorck-infos-split-chan)
-    ; TODO short-circuit if no imdb-info exists
-    (pipeline-async concurrency imdb-detail-chan (partial imdb/detail imdb/get-detail-page) imdb-search-chan)
-
-    ; TODO macro for collecting channel items
-    (go-loop [movies []]
-      (if-let [movie (<! imdb-detail-chan)]
-        (recur (conj movies movie))
-        (do
-          (>! result-chan (rated-movie/sorted movies))
-          (close! result-chan))))))
+    (pipeline-async concurrency imdb-detail-chan (skip imdb/continue? (partial imdb/detail imdb/get-detail-page)) imdb-search-chan)
+    (join result-chan rated-movie/sorted imdb-detail-chan)))

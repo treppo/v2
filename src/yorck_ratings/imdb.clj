@@ -50,12 +50,16 @@
         [title url]
         []))))
 
-(defn search [get-infos-fn rated-movie result-chan]
+(defn- pipeline-skip-when-empty [to merge-fn rated-movie from]
   (go
-    (if-let [search-infos (not-empty (<! (get-infos-fn (rated-movie/yorck-title rated-movie))))]
-      (>! result-chan (rated-movie/with-imdb-info rated-movie search-infos))
-      (>! result-chan rated-movie))
-    (close! result-chan)))
+    (if-let [info (not-empty (<! from))]
+      (>! to (merge-fn rated-movie info))
+      (>! to rated-movie))
+    (close! to)))
+
+(defn search [get-infos-fn rated-movie result-chan]
+  (let [info-channel (get-infos-fn (rated-movie/yorck-title rated-movie))]
+    (pipeline-skip-when-empty result-chan rated-movie/with-imdb-info rated-movie info-channel)))
 
 (defn rating [detail-page]
   (try
@@ -97,11 +101,8 @@
         [rating count]
         []))))
 
+(def continue? rated-movie/has-imdb-info?)
+
 (defn detail [get-page-fn rated-movie result-chan]
-  (go
-    (if (rated-movie/has-imdb-info? rated-movie)
-      (if-let [detail-infos (not-empty (<! (get-page-fn (rated-movie/imdb-url rated-movie))))]
-        (>! result-chan (rated-movie/with-imdb-rating rated-movie detail-infos))
-        (>! result-chan rated-movie))
-      (>! result-chan rated-movie))
-    (close! result-chan)))
+  (let [info-channel (get-page-fn (rated-movie/imdb-url rated-movie))]
+    (pipeline-skip-when-empty result-chan rated-movie/with-imdb-rating rated-movie info-channel)))

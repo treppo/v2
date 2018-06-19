@@ -1,4 +1,3 @@
-* write macros for channel piping
 * rename yorck to cinema
 * infos should be called info
 * use clojure idiomatic regex in yorck
