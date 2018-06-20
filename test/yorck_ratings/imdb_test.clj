@@ -12,19 +12,19 @@
 
 (def default-rated-movie (rated-movie/from-yorck-info [fixtures/carol-yorck-title fixtures/carol-yorck-url]))
 
-(def a-rated-movie-with-search-infos
+(def a-rated-movie-with-search-info
   (rated-movie/with-imdb-info default-rated-movie [title url]))
 
-(def a-rated-movie-with-detail-infos
-  (rated-movie/with-imdb-rating a-rated-movie-with-search-infos [rating rating-count]))
+(def a-rated-movie-with-detail-info
+  (rated-movie/with-imdb-rating a-rated-movie-with-search-info [rating rating-count]))
 
-(defn- make-get-search-infos-stub [infos] (fn [_] infos))
+(defn- make-get-imdb-info-stub [info] (fn [_] info))
 
 (fact "adds imdb title and url"
-      (imdb/search (make-get-search-infos-stub [title url]) default-rated-movie) => a-rated-movie-with-search-infos)
+      (imdb/search (make-get-imdb-info-stub [title url]) default-rated-movie) => a-rated-movie-with-search-info)
 
 (fact "does not add anything if the movie can't be found on imdb"
-      (imdb/search (make-get-search-infos-stub []) default-rated-movie) => default-rated-movie)
+      (imdb/search (make-get-imdb-info-stub []) default-rated-movie) => default-rated-movie)
 
 (fact "pulls titles and urls from imdb search page"
       (with-fake-routes-in-isolation
@@ -33,7 +33,7 @@
 
           (imdb/get-search-page yorck-title) => [title url])))
 
-(fact "returns no search infos if the movie can not be found on imdb"
+(fact "returns no search info if the movie can not be found on imdb"
       (with-fake-routes-in-isolation
         {fixtures/no-search-result-url (fixtures/status-ok fixtures/no-search-result-search-page)}
 
@@ -42,12 +42,12 @@
 (defn- get-detail-page [_] [rating rating-count])
 
 (fact "adds imdb rating and rating count"
-      (imdb/detail get-detail-page a-rated-movie-with-search-infos) => a-rated-movie-with-detail-infos)
+      (imdb/detail get-detail-page a-rated-movie-with-search-info) => a-rated-movie-with-detail-info)
 
 (defn- get-detail-page-without-rating [_] [])
 
 (fact "doesn't add rating if the movie doesn't have any"
-      (imdb/detail get-detail-page-without-rating a-rated-movie-with-search-infos) => a-rated-movie-with-search-infos)
+      (imdb/detail get-detail-page-without-rating a-rated-movie-with-search-info) => a-rated-movie-with-search-info)
 
 (fact "pulls rating and rating count from imdb detail page"
       (with-fake-routes-in-isolation

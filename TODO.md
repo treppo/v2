@@ -1,8 +1,7 @@
+* try out clojure spec
 * rename yorck to cinema
-* infos should be called info
+* add time-tables for cinema
 * use clojure idiomatic regex in yorck
 * handle connection errors gracefully
-* try out clojure spec
-* try out vertx
+* try out pedestal
 * add logging
-* add http level caching

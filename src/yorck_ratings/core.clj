@@ -13,12 +13,12 @@
         (close! to)))))
 
 (defn rated-movies [result-chan]
-  (let [yorck-infos-chan (chan)
+  (let [yorck-chan (chan)
         imdb-search-chan (chan)
         imdb-detail-chan (chan)
         concurrency (.availableProcessors (Runtime/getRuntime))]
 
-    (onto-chan yorck-infos-chan (yorck/infos yorck/get-yorck-infos))
-    (pipeline-blocking concurrency imdb-search-chan (map (partial imdb/search imdb/get-search-page)) yorck-infos-chan)
+    (onto-chan yorck-chan (yorck/info yorck/get-yorck-info))
+    (pipeline-blocking concurrency imdb-search-chan (map (partial imdb/search imdb/get-search-page)) yorck-chan)
     (pipeline-blocking concurrency imdb-detail-chan (map (partial imdb/detail imdb/get-detail-page)) imdb-search-chan)
     (join result-chan rated-movie/sorted imdb-detail-chan)))

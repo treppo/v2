@@ -10,17 +10,17 @@
 
 (fact "returns rated-movies with yorck info"
       (let [get-page-stub (fn [] [[a-title a-url]])]
-        
-        (yorck/infos get-page-stub) => [(rated-movie/from-yorck-info [a-title a-url])]))
+
+        (yorck/info get-page-stub) => [(rated-movie/from-yorck-info [a-title a-url])]))
 
 (fact "removes sneak previews"
       (let [get-page-stub (fn [] [[a-title a-url] ["a sneak preview" "another url"]])]
 
-        (yorck/infos get-page-stub) => [(rated-movie/from-yorck-info [a-title a-url])]))
+        (yorck/info get-page-stub) => [(rated-movie/from-yorck-info [a-title a-url])]))
 
 (defn without-dimension [title]
   (let [get-page-stub (fn [] [[title a-url]])]
-    (yorck/infos get-page-stub)))
+    (yorck/info get-page-stub)))
 
 (fact "removes dimension from title"
       (without-dimension "Pets - 2D") => [(rated-movie/from-yorck-info ["Pets" a-url])]
@@ -30,7 +30,7 @@
 
 (defn- with-rotated-article [title]
   (let [get-page-stub (fn [] [[title a-url]])]
-    (yorck/infos get-page-stub)))
+    (yorck/info get-page-stub)))
 
 (fact "rotates articles"
       (with-rotated-article "Hateful 8, The") =>
@@ -55,4 +55,4 @@
                         [fixtures/hateful-8-yorck-unfiltered-title fixtures/hateful-8-yorck-url]
                         ["Sneak FAF" "https://www.yorck.de/filme/sneak-faf"]]]
 
-          (yorck/get-yorck-infos) => expected)))
+          (yorck/get-yorck-info) => expected)))

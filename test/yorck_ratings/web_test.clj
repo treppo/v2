@@ -17,7 +17,7 @@
        (selector/select (selector/child (selector/class :rated-movie)))
        (mapv render/hickory-to-html)))
 
-(fact "return rated movie infos sorted by rating"
+(fact "return rated movie info sorted by rating"
       (with-fake-routes-in-isolation
         {fixtures/yorck-list-url       (fixtures/yorck-list-ok)
          fixtures/hateful-8-search-url (fixtures/status-ok fixtures/hateful-8-search-page)

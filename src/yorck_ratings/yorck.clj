@@ -27,7 +27,7 @@
 (defn- yorck-titles-urls [yorck-page]
   (map vector (yorck-titles yorck-page) (yorck-urls yorck-page)))
 
-(defn get-yorck-infos []
+(defn get-yorck-info []
   (yorck-titles-urls (http/get-html (str yorck-base-url "/filme?filter_today=true"))))
 
 (defn- is-sneak-preview [[title _]]
@@ -40,10 +40,9 @@
 (defn- remove-dimension [[title url]]
   [(string/replace-first title #" (- )?2D.*" "") url])
 
-(defn infos [get-page-fn]
-  (let [yorck-infos (get-page-fn)]
-    (->> yorck-infos
-         (remove is-sneak-preview)
-         (mapv remove-dimension)
-         (mapv rotate-article)
-         (mapv rated-movie/from-yorck-info))))
+(defn info [get-page-fn]
+  (->> (get-page-fn)
+       (remove is-sneak-preview)
+       (mapv remove-dimension)
+       (mapv rotate-article)
+       (mapv rated-movie/from-yorck-info)))
