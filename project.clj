@@ -3,7 +3,7 @@
   :url "https://yorck-ratings.treppo.org"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [clj-http "3.9.0"]
                  [ring/ring-core "1.7.0-RC1"]
                  [ring/ring-jetty-adapter "1.7.0-RC1"]
@@ -14,12 +14,11 @@
   :main yorck-ratings.web
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
-             :dev     {:dependencies  [[midje "1.9.1"]
-                                       [clj-http-fake "1.0.3"]
-                                       [ring/ring-mock "0.3.2"]]
-                       :plugins       [[lein-midje "3.2.1"]
-                                       [lein-jlink "0.2.0"]]
-                       :jlink-modules ["java.base" "java.sql" "java.naming"]}
-             :midje   {:resource-paths ["test/resources"]}}
+             :dev     {:dependencies   [[clj-http-fake "1.0.3"]
+                                        [ring/ring-mock "0.3.2"]]
+                       :resource-paths ["test/resources"]
+                       :plugins        [[lein-jlink "0.2.1"]
+                                        [lein-ancient "0.6.15"]]
+                       :jlink-modules  ["java.sql" "java.naming"]}}
   :min-lein-version "2.8.0"
   :uberjar-name "yorck-ratings-standalone.jar")

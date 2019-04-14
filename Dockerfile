@@ -2,7 +2,7 @@ FROM treppo/alpine-jdk9-leiningen AS build
 
 COPY . /opt/application
 WORKDIR /opt/application
-RUN lein do midje, jlink assemble
+RUN lein do test, jlink assemble
 
 
 FROM frolvlad/alpine-glibc

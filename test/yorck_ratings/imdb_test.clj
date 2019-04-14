@@ -1,7 +1,7 @@
 (ns yorck-ratings.imdb-test
   (:require [yorck-ratings.imdb :as imdb]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
-            [midje.sweet :refer [fact => =not=> throws]]
+            [clojure.test :refer [deftest is]]
             [yorck-ratings.fixtures :as fixtures]
             [yorck-ratings.rated-movie :as rated-movie]))
 
@@ -20,43 +20,48 @@
 
 (defn- make-get-imdb-info-stub [info] (fn [_] info))
 
-(fact "adds imdb title and url"
-      (imdb/search (make-get-imdb-info-stub [title url]) default-rated-movie) => a-rated-movie-with-search-info)
+(deftest add-imdb-title-and-url
+  (is (= (imdb/search (make-get-imdb-info-stub [title url]) default-rated-movie)
+         a-rated-movie-with-search-info)))
 
-(fact "does not add anything if the movie can't be found on imdb"
-      (imdb/search (make-get-imdb-info-stub []) default-rated-movie) => default-rated-movie)
+(deftest without-movie-no-title
+  (is (= (imdb/search (make-get-imdb-info-stub []) default-rated-movie)
+         default-rated-movie)))
 
-(fact "pulls titles and urls from imdb search page"
-      (with-fake-routes-in-isolation
-        {fixtures/carol-search-url (fixtures/status-ok fixtures/carol-search-page)}
-        (let [yorck-title fixtures/carol-yorck-title]
+(deftest titles-and-urls-from-imdb-search-page
+  (with-fake-routes-in-isolation
+    {fixtures/carol-search-url (fixtures/status-ok fixtures/carol-search-page)}
+    (let [yorck-title fixtures/carol-yorck-title]
+      (is (= (imdb/get-search-page yorck-title)
+             [title url])))))
 
-          (imdb/get-search-page yorck-title) => [title url])))
-
-(fact "returns no search info if the movie can not be found on imdb"
-      (with-fake-routes-in-isolation
-        {fixtures/no-search-result-url (fixtures/status-ok fixtures/no-search-result-search-page)}
-
-        (imdb/get-search-page fixtures/no-search-result-yorck-title) => []))
+(deftest without-movie-no-search-info
+  (with-fake-routes-in-isolation
+    {fixtures/no-search-result-url (fixtures/status-ok fixtures/no-search-result-search-page)}
+    (is (= (imdb/get-search-page fixtures/no-search-result-yorck-title)
+           []))))
 
 (defn- get-detail-page [_] [rating rating-count])
 
-(fact "adds imdb rating and rating count"
-      (imdb/detail get-detail-page a-rated-movie-with-search-info) => a-rated-movie-with-detail-info)
+(deftest add-imdb-rating-and-rating-count
+  (is (= (imdb/detail get-detail-page a-rated-movie-with-search-info)
+         a-rated-movie-with-detail-info)))
+
+(def called (atom 0))
 
 (defn- get-detail-page-without-rating [_] [])
 
-(fact "doesn't add rating if the movie doesn't have any"
-      (imdb/detail get-detail-page-without-rating a-rated-movie-with-search-info) => a-rated-movie-with-search-info)
+(deftest no-rating-without-search-info
+  (is (= (imdb/detail get-detail-page-without-rating a-rated-movie-with-search-info)
+         a-rated-movie-with-search-info)))
 
-(fact "pulls rating and rating count from imdb detail page"
-      (with-fake-routes-in-isolation
-        {url (fixtures/status-ok fixtures/carol-detail-page)}
+(deftest rating-and-rating-count
+  (with-fake-routes-in-isolation
+    {url (fixtures/status-ok fixtures/carol-detail-page)}
+    (is (= (imdb/get-detail-page url)
+           [rating rating-count]))))
 
-        (imdb/get-detail-page url) => [rating rating-count]))
-
-(fact "return no rating if rating can't be found"
-      (with-fake-routes-in-isolation
-        {url (fixtures/status-ok fixtures/no-rating-detail-page)}
-
-        (imdb/get-detail-page url) => []))
+(deftest no-rating
+  (with-fake-routes-in-isolation
+    {url (fixtures/status-ok fixtures/no-rating-detail-page)}
+    (is (= (imdb/get-detail-page url) []))))
