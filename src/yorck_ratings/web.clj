@@ -19,8 +19,8 @@
   (if (= "/" (:uri req))
     (go
       (let [result-chan (chan)]
-       (core/rated-movies result-chan)
-       (success-fn (found (view/markup (<! result-chan))))))
+        (core/rated-movies result-chan)
+        (success-fn (found (view/markup (<! result-chan))))))
     (not-found)))
 
 (defn -main [& args]

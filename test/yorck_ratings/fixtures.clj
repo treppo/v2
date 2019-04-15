@@ -16,7 +16,6 @@
 (defn yorck-list-ok []
   (fn [request] {:status 200 :headers {} :body yorck-list-page}))
 
-
 (def no-search-result-yorck-title "No search result")
 (def no-search-result-search-page (load-fixture "no_search_result_search_page.html"))
 (def no-search-result-url "https://m.imdb.com/find?q=No+search+result")

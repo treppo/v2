@@ -28,11 +28,11 @@
 
 (defn markup [movies]
   (html5
-    [:head
-     [:title "Yorck movies with IMDB ratings"]
-     [:meta {:charset "utf-8"}]
-     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-     [:style "* + * { margin-top: 1.5em; }
+   [:head
+    [:title "Yorck movies with IMDB ratings"]
+    [:meta {:charset "utf-8"}]
+    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+    [:style "* + * { margin-top: 1.5em; }
               body {
                 font-size: 16px;
                 font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", \"Oxygen\", \"Ubuntu\", \"Cantarell\", \"Fira Sans\", \"Droid Sans\", \"Helvetica Neue\", sans-serif;
@@ -66,9 +66,9 @@
                 padding-left: .5rem;
                 padding-right: .5rem;
                }"]]
-    [:body
-     [:h1 "IMDB rated Yorck movies"]
-     [:ol
-      (for [movie movies]
-        (do
-          (movie-item movie)))]]))
+   [:body
+    [:h1 "IMDB rated Yorck movies"]
+    [:ol
+     (for [movie movies]
+       (do
+         (movie-item movie)))]]))

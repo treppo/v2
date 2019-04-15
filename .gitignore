@@ -10,5 +10,5 @@ pom.xml.asc
 .hgignore
 .hg/
 .idea
-yorck-ratings.iml
 .DS_Store
+*.iml

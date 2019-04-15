@@ -11,15 +11,15 @@
 (defn- yorck-titles [yorck-page]
   (->> yorck-page
        (selector/select (selector/descendant
-                          (selector/class :movie-details)
-                          (selector/tag :h2)))
+                         (selector/class :movie-details)
+                         (selector/tag :h2)))
        (mapcat :content)))
 
 (defn- yorck-urls [yorck-page]
   (->> yorck-page
        (selector/select (selector/descendant
-                          (selector/class :movie-details)
-                          (selector/tag :a)))
+                         (selector/class :movie-details)
+                         (selector/tag :a)))
        (mapv :attrs)
        (map :href)
        (map #(str yorck-base-url %))))

@@ -12,8 +12,8 @@
   (try
     (->> search-page
          (selector/select (selector/descendant
-                            (selector/class :subpage)
-                            (selector/class :h3)))
+                           (selector/class :subpage)
+                           (selector/class :h3)))
          first
          :content
          first
@@ -27,7 +27,7 @@
   (try
     (->> search-page
          (selector/select (selector/descendant
-                            (selector/class :subpage)))
+                           (selector/class :subpage)))
          (mapv :attrs)
          (mapv :href)
          first
@@ -58,9 +58,9 @@
   (try
     (->> detail-page
          (selector/select (selector/descendant
-                            (selector/id :ratings-bar)
-                            selector/first-child
-                            (selector/class :inline-block)))
+                           (selector/id :ratings-bar)
+                           selector/first-child
+                           (selector/class :inline-block)))
          first
          :content
          first
@@ -74,10 +74,10 @@
   (try
     (->> detail-page
          (selector/select (selector/descendant
-                            (selector/id :ratings-bar)
-                            selector/first-child
-                            (selector/class :inline-block)
-                            (selector/class :text-muted)))
+                           (selector/id :ratings-bar)
+                           selector/first-child
+                           (selector/class :inline-block)
+                           (selector/class :text-muted)))
          first
          :content
          last

@@ -47,8 +47,6 @@
   (is (= (imdb/detail get-detail-page a-rated-movie-with-search-info)
          a-rated-movie-with-detail-info)))
 
-(def called (atom 0))
-
 (defn- get-detail-page-without-rating [_] [])
 
 (deftest no-rating-without-search-info

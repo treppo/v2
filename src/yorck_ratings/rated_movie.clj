@@ -15,7 +15,6 @@
 (defn with-imdb-rating [rated-movie [rating rating-count]]
   (merge rated-movie {:imdb-rating [rating rating-count]}))
 
-
 (defn rating [rated-movie]
   (let [[rating count] (:imdb-rating rated-movie)]
     rating))
@@ -40,7 +39,6 @@
   (let [[title url] (:imdb-info rated-movie)]
     url))
 
-
 (defn has-imdb-info? [rated-movie]
   (:imdb-info rated-movie))
 
@@ -49,7 +47,6 @@
 
 (defn no-imdb-rating? [rated-movie]
   (not (has-imdb-rating? rated-movie)))
-
 
 (def ^:private rating-threshold 7)
 (def ^:private count-threshold 1000)
@@ -71,9 +68,9 @@
 
 (defn considerable? [rated-movie]
   (or
-    (no-imdb-rating? rated-movie)
-    (and (rating-above-threshold rated-movie)
-         (count-below-threshold rated-movie))))
+   (no-imdb-rating? rated-movie)
+   (and (rating-above-threshold rated-movie)
+        (count-below-threshold rated-movie))))
 
 (defn- by-rating [a b]
   (cond
