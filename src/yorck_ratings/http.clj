@@ -1,7 +1,6 @@
 (ns yorck-ratings.http
   (:require [clj-http.client :as client]
-            [hickory.core :as hickory]
-            [clojure.core.async :refer [go chan >! close!]]))
+            [hickory.core :as hickory]))
 
 (def ^:private timeout 10000)
 

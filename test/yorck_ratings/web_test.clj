@@ -1,8 +1,9 @@
 (ns yorck-ratings.web-test
   (:require [yorck-ratings.web :refer [async-handler]]
             [yorck-ratings.fixtures :as fixtures]
+            [yorck-ratings.cache :as cache]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
             [hickory.core :as hickory]
             [hickory.render :as render]
             [hickory.select :as selector]
@@ -16,6 +17,10 @@
        (hickory/as-hickory)
        (selector/select (selector/child (selector/class :rated-movie)))
        (mapv render/hickory-to-html)))
+
+(use-fixtures :each (fn [test-f]
+                      (test-f)
+                      (cache/reset)))
 
 (deftest sorted-by-rating
   (with-fake-routes-in-isolation
@@ -33,7 +38,6 @@
       (async-handler (mock/request :get "/") success-handler error-handler)
       (Thread/sleep 500)
 
-      (is (= (:status @response)
-             200))
+      (is (= (:status @response) 200))
       (is (= (get-rated-movies-html (:body @response))
              expected)))))

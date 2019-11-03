@@ -5,6 +5,8 @@
             [ring.adapter.jetty :refer [run-jetty]])
   (:gen-class))
 
+(set! *warn-on-reflection* true)
+
 (defn- not-found []
   {:status  404
    :headers {"Content-Type" "text/plain"}

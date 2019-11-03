@@ -2,7 +2,6 @@
   (:require [hickory.select :as selector]
             [yorck-ratings.http :as http]
             [clojure.string :as string]
-            [clojure.core.async :refer [go chan >! <! close!]]
             [yorck-ratings.rated-movie :as rated-movie])
   (:import (java.net URLEncoder)))
 

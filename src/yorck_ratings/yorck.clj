@@ -2,8 +2,7 @@
   (:require [hickory.select :as selector]
             [clojure.string :as string]
             [yorck-ratings.http :as http]
-            [yorck-ratings.rated-movie :as rated-movie]
-            [clojure.core.async :refer [go chan >! <! close! pipeline-async go-loop]])
+            [yorck-ratings.rated-movie :as rated-movie])
   (:import (java.util.regex Pattern)))
 
 (def ^:private yorck-base-url "https://www.yorck.de")

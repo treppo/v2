@@ -2,7 +2,6 @@
   (:require [yorck-ratings.http :as http]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
             [clojure.test :refer [deftest is]]
-            [clojure.core.async :as async]
             [hickory.core :as hickory]
             [yorck-ratings.fixtures :as fixtures]))
 
