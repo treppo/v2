@@ -10,6 +10,7 @@
                  [hickory "0.7.1"]
                  [hiccup "1.0.5"]
                  [org.clojure/core.async "0.4.490"]]
+  :local-repo ".m2"
   :aot [yorck-ratings.web]
   :main yorck-ratings.web
   :target-path "target/%s"
