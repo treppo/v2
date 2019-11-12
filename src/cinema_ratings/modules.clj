@@ -1,6 +1,6 @@
 (ns cinema-ratings.modules
   (:require [cinema-ratings.imdb :as imdb]
-            [cinema-ratings.yorck :as cinema]
+            [cinema-ratings.cinema.yorck :as cinema]
             [cinema-ratings.core :as core]))
 
 (def rated-movies

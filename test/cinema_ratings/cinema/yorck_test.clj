@@ -1,5 +1,5 @@
-(ns cinema-ratings.yorck-test
-  (:require [cinema-ratings.yorck :as yorck]
+(ns cinema-ratings.cinema.yorck-test
+  (:require [cinema-ratings.cinema.yorck :as yorck]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
             [clojure.test :refer [deftest is]]
             [cinema-ratings.rated-movie :as rated-movie]

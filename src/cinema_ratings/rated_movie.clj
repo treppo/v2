@@ -1,49 +1,45 @@
 (ns cinema-ratings.rated-movie)
 
-(defn make [{:keys [cinema-info imdb-info imdb-rating]}]
+(defn make [{:keys [cinema-info imdb-info]}]
   (assert (not (nil? cinema-info)) "At least cinema info must be provided")
-  {:cinema-info  cinema-info
-   :imdb-info   imdb-info
-   :imdb-rating imdb-rating})
+  {:cinema-info cinema-info
+   :imdb-info   imdb-info})
 
 (defn from-cinema-info [[title url]]
-  (make {:cinema-info [title url]}))
+  (make {:cinema-info {:title title
+                       :url   url}}))
 
 (defn with-imdb-info [rated-movie [title url]]
-  (merge rated-movie {:imdb-info [title url]}))
+  (merge rated-movie {:imdb-info {:title title
+                                  :url   url}}))
 
 (defn with-imdb-rating [rated-movie [rating rating-count]]
-  (merge rated-movie {:imdb-rating [rating rating-count]}))
+  (merge-with into rated-movie {:imdb-info {:rating       rating
+                                            :rating-count rating-count}}))
 
 (defn rating [rated-movie]
-  (let [[rating count] (:imdb-rating rated-movie)]
-    rating))
+  (get-in rated-movie [:imdb-info :rating]))
 
 (defn rating-count [rated-movie]
-  (let [[rating count] (:imdb-rating rated-movie)]
-    count))
+  (get-in rated-movie [:imdb-info :rating-count]))
 
 (defn cinema-title [rated-movie]
-  (let [[title url] (:cinema-info rated-movie)]
-    title))
+  (get-in rated-movie [:cinema-info :title]))
 
 (defn cinema-url [rated-movie]
-  (let [[title url] (:cinema-info rated-movie)]
-    url))
+  (get-in rated-movie [:cinema-info :url]))
 
 (defn imdb-title [rated-movie]
-  (let [[title url] (:imdb-info rated-movie)]
-    title))
+  (get-in rated-movie [:imdb-info :title]))
 
 (defn imdb-url [rated-movie]
-  (let [[title url] (:imdb-info rated-movie)]
-    url))
+  (get-in rated-movie [:imdb-info :url]))
 
 (defn has-imdb-info? [rated-movie]
   (:imdb-info rated-movie))
 
 (defn has-imdb-rating? [rated-movie]
-  (:imdb-rating rated-movie))
+  (rating rated-movie))
 
 (defn no-imdb-rating? [rated-movie]
   (not (has-imdb-rating? rated-movie)))

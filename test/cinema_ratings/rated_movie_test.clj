@@ -1,28 +1,41 @@
 (ns cinema-ratings.rated-movie-test
   (:require [clojure.test :refer [deftest is]]
-            [cinema-ratings.rated-movie :refer [sorted make]]
-            [cinema-ratings.fixtures :as fixtures]))
+            [cinema-ratings.rated-movie :refer [sorted make]]))
 
 (deftest sorting-by-rating
-  (let [lower-rated (make {:cinema-info  ["title" "#"]
-                           :imdb-info   ["title" "#"]
-                           :imdb-rating [7.2 10000]})
-        higher-rated (make {:cinema-info  ["title" "#"]
-                            :imdb-info   ["title" "#"]
-                            :imdb-rating [7.3 10000]})
-        not-rated (make {:cinema-info ["title" "#"]})]
+  (let [lower-rated (make {:cinema-info {:title "title"
+                                         :url   "#"}
+                           :imdb-info   {:title        "title"
+                                         :url          "#"
+                                         :rating       7.2
+                                         :rating-count 10000}})
+        higher-rated (make {:cinema-info {:title "title"
+                                          :url   "#"}
+                            :imdb-info   {:title        "title"
+                                          :url          "#"
+                                          :rating       7.3
+                                          :rating-count 10000}})
+        not-rated (make {:cinema-info {:title "title"
+                                       :url   "#"}})]
 
     (is (= (sorted [lower-rated higher-rated]) [higher-rated lower-rated]))
     (is (= (sorted [not-rated lower-rated]) [lower-rated not-rated]))))
 
 (deftest sorting-not-rated
-  (let [below (make {:cinema-info  ["title" "#"]
-                     :imdb-info   ["title" "#"]
-                     :imdb-rating [6.9 10000]})
-        above (make {:cinema-info  ["title" "#"]
-                     :imdb-info   ["title" "#"]
-                     :imdb-rating [7 10000]})
-        not-rated (make {:cinema-info ["title" "#"]})]
+  (let [below (make {:cinema-info {:title "title"
+                                   :url   "#"}
+                     :imdb-info   {:title        "title"
+                                   :url          "#"
+                                   :rating       6.9
+                                   :rating-count 10000}})
+        above (make {:cinema-info {:title "title"
+                                   :url   "#"}
+                     :imdb-info   {:title        "title"
+                                   :url          "#"
+                                   :rating       7
+                                   :rating-count 10000}})
+        not-rated (make {:cinema-info {:title "title"
+                                       :url   "#"}})]
 
     (is (= (sorted [above not-rated below]) [above not-rated below]))
     (is (= (sorted [above below not-rated]) [above not-rated below]))

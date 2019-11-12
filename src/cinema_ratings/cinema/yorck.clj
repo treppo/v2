@@ -1,4 +1,4 @@
-(ns cinema-ratings.yorck
+(ns cinema-ratings.cinema.yorck
   (:require [hickory.select :as selector]
             [clojure.string :as string]
             [cinema-ratings.http :as http]
@@ -10,15 +10,15 @@
 (defn- yorck-titles [yorck-page]
   (->> yorck-page
        (selector/select (selector/descendant
-                          (selector/class :movie-details)
-                          (selector/tag :h2)))
+                         (selector/class :movie-details)
+                         (selector/tag :h2)))
        (mapcat :content)))
 
 (defn- yorck-urls [yorck-page]
   (->> yorck-page
        (selector/select (selector/descendant
-                          (selector/class :movie-details)
-                          (selector/tag :a)))
+                         (selector/class :movie-details)
+                         (selector/tag :a)))
        (mapv :attrs)
        (map :href)
        (map #(str yorck-base-url %))))
@@ -42,8 +42,8 @@
 (defn- remove-premiere [[title url]]
   [(string/replace-first title #" - Premiere" "") url])
 
-(defn info [get-page-fn]
-  (->> (get-page-fn)
+(defn info [get-info-fn]
+  (->> (get-info-fn)
        (remove is-sneak-preview)
        (mapv remove-dimension)
        (mapv remove-premiere)

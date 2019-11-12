@@ -31,9 +31,13 @@
 (def carol-imdb-title "Carol")
 (def carol-rating 7.2)
 (def carol-rating-count 89891)
-(def carol-rated-movie (rated-movie/make {:cinema-info  [carol-yorck-title carol-yorck-url]
-                                          :imdb-info   [carol-imdb-title carol-detail-url]
-                                          :imdb-rating [carol-rating carol-rating-count]}))
+(def carol-rated-movie
+  {:cinema-info {:title carol-yorck-title
+                 :url   carol-yorck-url}
+   :imdb-info   {:title        carol-imdb-title
+                 :url          carol-detail-url
+                 :rating       carol-rating
+                 :rating-count carol-rating-count}})
 
 (def hateful-8-yorck-unfiltered-title "Hateful 8, The")
 (def hateful-8-yorck-title "The Hateful 8")
@@ -43,6 +47,10 @@
 (def hateful-8-detail-page (load-fixture "hateful_8_detail_page.html"))
 (def hateful-8-search-page (load-fixture "hateful_8_search_page.html"))
 
-(def hateful-8-rated-movie (rated-movie/make {:cinema-info  [hateful-8-yorck-title hateful-8-yorck-url]
-                                              :imdb-info   ["The Hateful Eight" hateful-8-detail-url]
-                                              :imdb-rating [7.8 391351]}))
+(def hateful-8-rated-movie
+  {:cinema-info {:title hateful-8-yorck-title
+                 :url   hateful-8-yorck-url}
+   :imdb-info   {:title        "The Hateful Eight"
+                 :url          hateful-8-detail-url
+                 :rating       7.8
+                 :rating-count 391351}})
