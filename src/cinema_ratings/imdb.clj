@@ -40,7 +40,7 @@
 (defn- search-url [title]
   (str base-url "/find?q=" (url-encode title)))
 
-(defn get-search-page [cinema-title]
+(defn get-search-info [cinema-title]
   (let [page (http/get-html (search-url cinema-title))
         title (parse-title page)
         url (parse-url page)]
@@ -84,7 +84,7 @@
          Integer/parseInt)
     (catch Exception e nil)))
 
-(defn get-detail-page [url]
+(defn get-detail-info [url]
   (let [page (http/get-html url)
         rating (rating page)
         count (rating-count page)]

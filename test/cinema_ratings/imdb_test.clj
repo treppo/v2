@@ -32,13 +32,13 @@
   (with-fake-routes-in-isolation
     {fixtures/carol-search-url (fixtures/status-ok fixtures/carol-search-page)}
     (let [yorck-title fixtures/carol-yorck-title]
-      (is (= (imdb/get-search-page yorck-title)
+      (is (= (imdb/get-search-info yorck-title)
              [title url])))))
 
 (deftest without-movie-no-search-info
   (with-fake-routes-in-isolation
     {fixtures/no-search-result-url (fixtures/status-ok fixtures/no-search-result-search-page)}
-    (is (= (imdb/get-search-page fixtures/no-search-result-yorck-title)
+    (is (= (imdb/get-search-info fixtures/no-search-result-yorck-title)
            []))))
 
 (defn- get-detail-page [_] [rating rating-count])
@@ -56,10 +56,10 @@
 (deftest rating-and-rating-count
   (with-fake-routes-in-isolation
     {url (fixtures/status-ok fixtures/carol-detail-page)}
-    (is (= (imdb/get-detail-page url)
+    (is (= (imdb/get-detail-info url)
            [rating rating-count]))))
 
 (deftest no-rating
   (with-fake-routes-in-isolation
     {url (fixtures/status-ok fixtures/no-rating-detail-page)}
-    (is (= (imdb/get-detail-page url) []))))
+    (is (= (imdb/get-detail-info url) []))))

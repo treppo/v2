@@ -1,5 +1,5 @@
 (ns cinema-ratings.web
-  (:require [cinema-ratings.core :as core]
+  (:require [cinema-ratings.modules :as modules]
             [cinema-ratings.view :as view]
             [clojure.core.async :refer [go <! chan close!]]
             [ring.adapter.jetty :refer [run-jetty]])
@@ -21,11 +21,14 @@
   (if (= "/" (:uri req))
     (go
       (let [result-chan (chan)]
-        (core/rated-movies result-chan)
+        (modules/rated-movies result-chan)
         (success-fn (found (view/markup (<! result-chan))))))
     (not-found)))
+
+(defn- ^String port []
+  (or (System/getenv "PORT") "8000"))
 
 (defn -main [& args]
   (run-jetty async-handler
              {:async? true
-              :port  (Integer/valueOf (or (System/getenv "PORT") "8000"))}))
+              :port  (Integer/valueOf (port))}))
