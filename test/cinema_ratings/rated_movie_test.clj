@@ -1,28 +1,28 @@
-(ns yorck-ratings.rated-movie-test
+(ns cinema-ratings.rated-movie-test
   (:require [clojure.test :refer [deftest is]]
-            [yorck-ratings.rated-movie :refer [sorted make]]
-            [yorck-ratings.fixtures :as fixtures]))
+            [cinema-ratings.rated-movie :refer [sorted make]]
+            [cinema-ratings.fixtures :as fixtures]))
 
 (deftest sorting-by-rating
-  (let [lower-rated (make {:yorck-info  ["title" "#"]
+  (let [lower-rated (make {:cinema-info  ["title" "#"]
                            :imdb-info   ["title" "#"]
                            :imdb-rating [7.2 10000]})
-        higher-rated (make {:yorck-info  ["title" "#"]
+        higher-rated (make {:cinema-info  ["title" "#"]
                             :imdb-info   ["title" "#"]
                             :imdb-rating [7.3 10000]})
-        not-rated (make {:yorck-info ["title" "#"]})]
+        not-rated (make {:cinema-info ["title" "#"]})]
 
     (is (= (sorted [lower-rated higher-rated]) [higher-rated lower-rated]))
     (is (= (sorted [not-rated lower-rated]) [lower-rated not-rated]))))
 
 (deftest sorting-not-rated
-  (let [below (make {:yorck-info  ["title" "#"]
+  (let [below (make {:cinema-info  ["title" "#"]
                      :imdb-info   ["title" "#"]
                      :imdb-rating [6.9 10000]})
-        above (make {:yorck-info  ["title" "#"]
+        above (make {:cinema-info  ["title" "#"]
                      :imdb-info   ["title" "#"]
                      :imdb-rating [7 10000]})
-        not-rated (make {:yorck-info ["title" "#"]})]
+        not-rated (make {:cinema-info ["title" "#"]})]
 
     (is (= (sorted [above not-rated below]) [above not-rated below]))
     (is (= (sorted [above below not-rated]) [above not-rated below]))

@@ -1,4 +1,4 @@
-(ns yorck-ratings.http
+(ns cinema-ratings.http
   (:require [clj-http.client :as client]
             [hickory.core :as hickory]))
 

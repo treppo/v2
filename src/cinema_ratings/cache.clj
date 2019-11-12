@@ -1,4 +1,4 @@
-(ns yorck-ratings.cache
+(ns cinema-ratings.cache
   (:import (java.time LocalDate Clock)))
 
 (def ^:private initial-value {:date  nil
@@ -11,7 +11,6 @@
 (defn- today [] (LocalDate/now clock))
 
 (defn from-cache []
-  (println @cache)
   (when (= (:date @cache) (today))
     (:value @cache)))
 

@@ -1,7 +1,7 @@
-(ns yorck-ratings.web-test
-  (:require [yorck-ratings.web :refer [async-handler]]
-            [yorck-ratings.fixtures :as fixtures]
-            [yorck-ratings.cache :as cache]
+(ns cinema-ratings.web-test
+  (:require [cinema-ratings.web :refer [async-handler]]
+            [cinema-ratings.fixtures :as fixtures]
+            [cinema-ratings.cache :as cache]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
             [clojure.test :refer [deftest is use-fixtures]]
             [hickory.core :as hickory]
@@ -9,7 +9,7 @@
             [hickory.select :as selector]
             [hiccup.core :as hiccup]
             [ring.mock.request :as mock]
-            [yorck-ratings.view :as view]))
+            [cinema-ratings.view :as view]))
 
 (defn- get-rated-movies-html [page-html]
   (->> page-html

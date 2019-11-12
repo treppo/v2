@@ -1,6 +1,6 @@
-(ns yorck-ratings.cache-test
+(ns cinema-ratings.cache-test
   (:require [clojure.test :refer :all])
-  (:require [yorck-ratings.cache :refer :all])
+  (:require [cinema-ratings.cache :refer :all])
   (:import (java.time Clock Duration)))
 
 (defn tomorrow-clock [] (Clock/offset (Clock/systemUTC) (Duration/ofDays 1)))

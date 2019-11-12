@@ -1,9 +1,9 @@
-(ns yorck-ratings.http-test
-  (:require [yorck-ratings.http :as http]
+(ns cinema-ratings.http-test
+  (:require [cinema-ratings.http :as http]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
             [clojure.test :refer [deftest is]]
             [hickory.core :as hickory]
-            [yorck-ratings.fixtures :as fixtures]))
+            [cinema-ratings.fixtures :as fixtures]))
 
 (deftest get-request
   (with-fake-routes-in-isolation

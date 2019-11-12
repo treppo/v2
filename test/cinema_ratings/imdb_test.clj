@@ -1,16 +1,16 @@
-(ns yorck-ratings.imdb-test
-  (:require [yorck-ratings.imdb :as imdb]
+(ns cinema-ratings.imdb-test
+  (:require [cinema-ratings.imdb :as imdb]
             [clj-http.fake :refer [with-fake-routes-in-isolation]]
             [clojure.test :refer [deftest is]]
-            [yorck-ratings.fixtures :as fixtures]
-            [yorck-ratings.rated-movie :as rated-movie]))
+            [cinema-ratings.fixtures :as fixtures]
+            [cinema-ratings.rated-movie :as rated-movie]))
 
 (def title fixtures/carol-imdb-title)
 (def url fixtures/carol-detail-url)
 (def rating fixtures/carol-rating)
 (def rating-count fixtures/carol-rating-count)
 
-(def default-rated-movie (rated-movie/from-yorck-info [fixtures/carol-yorck-title fixtures/carol-yorck-url]))
+(def default-rated-movie (rated-movie/from-cinema-info [fixtures/carol-yorck-title fixtures/carol-yorck-url]))
 
 (def a-rated-movie-with-search-info
   (rated-movie/with-imdb-info default-rated-movie [title url]))

@@ -1,6 +1,6 @@
-(ns yorck-ratings.web
-  (:require [yorck-ratings.core :as core]
-            [yorck-ratings.view :as view]
+(ns cinema-ratings.web
+  (:require [cinema-ratings.core :as core]
+            [cinema-ratings.view :as view]
             [clojure.core.async :refer [go <! chan close!]]
             [ring.adapter.jetty :refer [run-jetty]])
   (:gen-class))

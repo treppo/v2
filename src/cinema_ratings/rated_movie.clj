@@ -1,13 +1,13 @@
-(ns yorck-ratings.rated-movie)
+(ns cinema-ratings.rated-movie)
 
-(defn make [{:keys [yorck-info imdb-info imdb-rating]}]
-  (assert (not (nil? yorck-info)) "At least Yorck info must be provided")
-  {:yorck-info  yorck-info
+(defn make [{:keys [cinema-info imdb-info imdb-rating]}]
+  (assert (not (nil? cinema-info)) "At least cinema info must be provided")
+  {:cinema-info  cinema-info
    :imdb-info   imdb-info
    :imdb-rating imdb-rating})
 
-(defn from-yorck-info [[title url]]
-  (make {:yorck-info [title url]}))
+(defn from-cinema-info [[title url]]
+  (make {:cinema-info [title url]}))
 
 (defn with-imdb-info [rated-movie [title url]]
   (merge rated-movie {:imdb-info [title url]}))
@@ -23,12 +23,12 @@
   (let [[rating count] (:imdb-rating rated-movie)]
     count))
 
-(defn yorck-title [rated-movie]
-  (let [[title url] (:yorck-info rated-movie)]
+(defn cinema-title [rated-movie]
+  (let [[title url] (:cinema-info rated-movie)]
     title))
 
-(defn yorck-url [rated-movie]
-  (let [[title url] (:yorck-info rated-movie)]
+(defn cinema-url [rated-movie]
+  (let [[title url] (:cinema-info rated-movie)]
     url))
 
 (defn imdb-title [rated-movie]

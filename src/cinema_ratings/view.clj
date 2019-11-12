@@ -1,6 +1,6 @@
-(ns yorck-ratings.view
+(ns cinema-ratings.view
   (:use [hiccup.page])
-  (:require [yorck-ratings.rated-movie :as rated-movie]))
+  (:require [cinema-ratings.rated-movie :as rated-movie]))
 
 (defn- rating [rated-movie]
   (if (rated-movie/has-imdb-rating? rated-movie)
@@ -24,12 +24,12 @@
      separator
      (imdb-info rated-movie)
      separator
-     [:a {:href (rated-movie/yorck-url rated-movie)} (rated-movie/yorck-title rated-movie)]]))
+     [:a {:href (rated-movie/cinema-url rated-movie)} (rated-movie/cinema-title rated-movie)]]))
 
 (defn markup [movies]
   (html5
    [:head
-    [:title "Yorck movies with IMDB ratings"]
+    [:title "IMDB ratings for movies running in the cinema"]
     [:meta {:charset "utf-8"}]
     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
     [:style "* + * { margin-top: 1.5em; }
@@ -67,7 +67,7 @@
                 padding-right: .5rem;
                }"]]
    [:body
-    [:h1 "IMDB rated Yorck movies"]
+    [:h1 "IMDB rated cinema movies"]
     [:ol
      (for [movie movies]
        (do

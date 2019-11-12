@@ -8,7 +8,7 @@ RUN lein do test, jlink assemble
 FROM frolvlad/alpine-glibc:alpine-3.10
 
 RUN apk add --update --no-cache libstdc++
-COPY --from=build /opt/application/target/default/jlink /opt/yorck-ratings
-WORKDIR /opt/yorck-ratings
+COPY --from=build /opt/application/target/default/jlink /opt/cinema-ratings
+WORKDIR /opt/cinema-ratings
 ENTRYPOINT ["/bin/sh", "-c"]
-CMD ["bin/yorck-ratings"]
+CMD ["bin/cinema-ratings"]

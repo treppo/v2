@@ -1,8 +1,8 @@
-(ns yorck-ratings.imdb
+(ns cinema-ratings.imdb
   (:require [hickory.select :as selector]
-            [yorck-ratings.http :as http]
+            [cinema-ratings.http :as http]
             [clojure.string :as string]
-            [yorck-ratings.rated-movie :as rated-movie])
+            [cinema-ratings.rated-movie :as rated-movie])
   (:import (java.net URLEncoder)))
 
 (def ^:private base-url "https://m.imdb.com")
@@ -40,8 +40,8 @@
 (defn- search-url [title]
   (str base-url "/find?q=" (url-encode title)))
 
-(defn get-search-page [yorck-title]
-  (let [page (http/get-html (search-url yorck-title))
+(defn get-search-page [cinema-title]
+  (let [page (http/get-html (search-url cinema-title))
         title (parse-title page)
         url (parse-url page)]
     (if (and title url)
@@ -49,7 +49,7 @@
       [])))
 
 (defn search [get-info-fn rated-movie]
-  (if-let [info (not-empty (get-info-fn (rated-movie/yorck-title rated-movie)))]
+  (if-let [info (not-empty (get-info-fn (rated-movie/cinema-title rated-movie)))]
     (rated-movie/with-imdb-info rated-movie info)
     rated-movie))
 
