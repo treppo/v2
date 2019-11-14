@@ -6,7 +6,7 @@
             [cinema-ratings.fixtures :as fixtures]))
 
 (def a-title "a title")
-(def a-url "a url")
+(def a-url "https://example.com")
 
 (deftest rated-movies-with-yorck-info
   (let [get-page-stub (fn [] [[a-title a-url]])]

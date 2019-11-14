@@ -1,41 +1,44 @@
 (ns cinema-ratings.rated-movie-test
   (:require [clojure.test :refer [deftest is]]
-            [cinema-ratings.rated-movie :refer [sorted make]]))
+            [cinema-ratings.rated-movie :refer [sorted from-cinema-info]]
+            [clojure.spec.test.alpha :as stest]))
+
+(stest/instrument `from-cinema-info)
 
 (deftest sorting-by-rating
-  (let [lower-rated (make {:cinema-info {:title "title"
-                                         :url   "#"}
-                           :imdb-info   {:title        "title"
-                                         :url          "#"
-                                         :rating       7.2
-                                         :rating-count 10000}})
-        higher-rated (make {:cinema-info {:title "title"
-                                          :url   "#"}
-                            :imdb-info   {:title        "title"
-                                          :url          "#"
-                                          :rating       7.3
-                                          :rating-count 10000}})
-        not-rated (make {:cinema-info {:title "title"
-                                       :url   "#"}})]
+  (let [lower-rated {:cinema-info {:title "title"
+                                   :url   "#"}
+                     :imdb-info   {:title        "title"
+                                   :url          "#"
+                                   :rating       7.2
+                                   :rating-count 10000}}
+        higher-rated {:cinema-info {:title "title"
+                                    :url   "#"}
+                      :imdb-info   {:title        "title"
+                                    :url          "#"
+                                    :rating       7.3
+                                    :rating-count 10000}}
+        not-rated {:cinema-info {:title "title"
+                                 :url   "#"}}]
 
     (is (= (sorted [lower-rated higher-rated]) [higher-rated lower-rated]))
     (is (= (sorted [not-rated lower-rated]) [lower-rated not-rated]))))
 
 (deftest sorting-not-rated
-  (let [below (make {:cinema-info {:title "title"
-                                   :url   "#"}
-                     :imdb-info   {:title        "title"
-                                   :url          "#"
-                                   :rating       6.9
-                                   :rating-count 10000}})
-        above (make {:cinema-info {:title "title"
-                                   :url   "#"}
-                     :imdb-info   {:title        "title"
-                                   :url          "#"
-                                   :rating       7
-                                   :rating-count 10000}})
-        not-rated (make {:cinema-info {:title "title"
-                                       :url   "#"}})]
+  (let [below {:cinema-info {:title "title"
+                             :url   "#"}
+               :imdb-info   {:title        "title"
+                             :url          "#"
+                             :rating       6.9
+                             :rating-count 10000}}
+        above {:cinema-info {:title "title"
+                             :url   "#"}
+               :imdb-info   {:title        "title"
+                             :url          "#"
+                             :rating       7
+                             :rating-count 10000}}
+        not-rated {:cinema-info {:title "title"
+                                 :url   "#"}}]
 
     (is (= (sorted [above not-rated below]) [above not-rated below]))
     (is (= (sorted [above below not-rated]) [above not-rated below]))

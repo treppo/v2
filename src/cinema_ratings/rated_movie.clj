@@ -1,13 +1,31 @@
-(ns cinema-ratings.rated-movie)
+(ns cinema-ratings.rated-movie
+  (:require [clojure.spec.alpha :as spec])
+  (:import (java.net URL)))
 
-(defn make [{:keys [cinema-info imdb-info]}]
-  (assert (not (nil? cinema-info)) "At least cinema info must be provided")
+(defn- url? [s]
+  (try
+    (boolean (URL. s))
+    (catch Exception _ false)))
+
+(spec/def ::title string?)
+(spec/def ::url url?)
+(spec/def ::rating float?)
+(spec/def ::ratings-count int?)
+(spec/def ::cinema-info (spec/keys :req [::title ::url]))
+(spec/def ::imdb-info (spec/keys :req [::title ::url]
+                                 :opt [::rating ::ratings-count]))
+(spec/def ::rated-movie (spec/keys :req [::cinema-info ::imdb-info]))
+
+(defn- make [{:keys [cinema-info imdb-info]}]
   {:cinema-info cinema-info
    :imdb-info   imdb-info})
 
 (defn from-cinema-info [[title url]]
   (make {:cinema-info {:title title
                        :url   url}}))
+
+(spec/fdef from-cinema-info :args (spec/cat :cinema-info (spec/tuple ::title ::url))
+  :ret ::rated-movie)
 
 (defn with-imdb-info [rated-movie [title url]]
   (merge rated-movie {:imdb-info {:title title

@@ -11,13 +11,14 @@
         (>! to (f collection))
         (close! to)))))
 
+(def concurrency (.availableProcessors (Runtime/getRuntime)))
+
 (defn rated-movies [cinema-info imdb-search imdb-detail result-chan]
   (if-let [sorted-movies (from-cache)]
     (go (>! result-chan sorted-movies))
     (let [cinema-chan (chan)
           imdb-search-chan (chan)
-          imdb-detail-chan (chan)
-          concurrency (.availableProcessors (Runtime/getRuntime))]
+          imdb-detail-chan (chan)]
 
       (onto-chan cinema-chan (cinema-info))
       (pipeline-blocking concurrency imdb-search-chan (map imdb-search) cinema-chan)
