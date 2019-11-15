@@ -2,7 +2,7 @@ FROM treppo/alpine-leiningen:13 AS build
 
 COPY . /opt/application
 WORKDIR /opt/application
-RUN lein do test, jlink assemble
+RUN lein build
 
 
 FROM frolvlad/alpine-glibc:alpine-3.10

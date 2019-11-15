@@ -24,6 +24,7 @@
                                         [lein-ancient "0.6.15"]
                                         [lein-cljfmt "0.6.4"]]
                        :jlink-modules  ["java.sql" "java.naming"]}}
-  :aliases {"t" ["do" ["cljfmt" "fix"] ["test"]]}
+  :aliases {"t" ["do" ["cljfmt" "fix"] ["test"]]
+            "build" ["do" "clean" ["test"] ["jlink" "assemble"]]}
   :min-lein-version "2.8.0"
   :uberjar-name "cinema-ratings-standalone.jar")
