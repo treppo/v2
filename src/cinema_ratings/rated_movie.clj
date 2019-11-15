@@ -11,20 +11,20 @@
 (spec/def ::url url?)
 (spec/def ::rating float?)
 (spec/def ::ratings-count int?)
-(spec/def ::cinema-info (spec/keys :req [::title ::url]))
-(spec/def ::imdb-info (spec/keys :req [::title ::url]
-                                 :opt [::rating ::ratings-count]))
-(spec/def ::rated-movie (spec/keys :req [::cinema-info ::imdb-info]))
+(spec/def ::cinema-info (spec/keys :req-un [::title ::url]))
+(spec/def ::imdb-info (spec/keys :req-un [::title ::url]
+                                 :opt-un [::rating ::ratings-count]))
+(spec/def ::rated-movie (spec/keys :req-un [::cinema-info ::imdb-info]))
 
 (defn- make [{:keys [cinema-info imdb-info]}]
   {:cinema-info cinema-info
    :imdb-info   imdb-info})
 
-(defn from-cinema-info [[title url]]
-  (make {:cinema-info {:title title
-                       :url   url}}))
+(defn from-cinema-info [cinema-info]
+  (make {:cinema-info cinema-info}))
 
-(spec/fdef from-cinema-info :args (spec/cat :cinema-info (spec/tuple ::title ::url))
+(spec/fdef from-cinema-info
+  :args (spec/cat :cinema-info ::cinema-info)
   :ret ::rated-movie)
 
 (defn with-imdb-info [rated-movie [title url]]

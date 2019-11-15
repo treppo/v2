@@ -17,11 +17,13 @@
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
              :dev     {:dependencies   [[clj-http-fake "1.0.3"]
-                                        [ring/ring-mock "0.4.0"]]
+                                        [ring/ring-mock "0.4.0"]
+                                        [org.clojure/test.check "0.10.0"]]
                        :resource-paths ["test/resources"]
                        :plugins        [[lein-jlink "0.2.1"]
                                         [lein-ancient "0.6.15"]
                                         [lein-cljfmt "0.6.4"]]
                        :jlink-modules  ["java.sql" "java.naming"]}}
+  :aliases {"t" ["do" ["cljfmt" "fix"] ["test"]]}
   :min-lein-version "2.8.0"
   :uberjar-name "cinema-ratings-standalone.jar")

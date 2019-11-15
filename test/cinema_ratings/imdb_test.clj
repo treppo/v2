@@ -10,7 +10,7 @@
 (def rating fixtures/carol-rating)
 (def rating-count fixtures/carol-rating-count)
 
-(def default-rated-movie (rated-movie/from-cinema-info [fixtures/carol-yorck-title fixtures/carol-yorck-url]))
+(def default-rated-movie (rated-movie/from-cinema-info {:title fixtures/carol-yorck-title :url fixtures/carol-yorck-url}))
 
 (def a-rated-movie-with-search-info
   (rated-movie/with-imdb-info default-rated-movie [title url]))
